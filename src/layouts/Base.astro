@@ -1,0 +1,340 @@
+---
+import type { Lang } from '../i18n/strings';
+import { strings } from '../i18n/strings';
+import { projects, contactEmail } from '../data/projects';
+
+interface Props {
+  lang: Lang;
+  /** Path of THIS page relative to the site root, e.g. '/' or '/tr/'. */
+  path: string;
+}
+
+const { lang, path } = Astro.props;
+const t = strings[lang];
+
+const site = 'https://alpsenel.com';
+const canonical = new URL(path, site).href;
+const enUrl = new URL('/', site).href;
+const trUrl = new URL('/tr/', site).href;
+const ogImage = new URL('/og.png', site).href;
+
+// Person + WebSite structured data — the name lives here for search engines,
+// even though it is intentionally never shown in the visible page body.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': `${site}/#person`,
+      name: 'Alp Senel',
+      url: site,
+      jobTitle: lang === 'tr' ? 'Web Geliştirici & Tasarımcı' : 'Web Developer & Designer',
+      knowsAbout: ['Web Development', 'Web Design', 'E-commerce', 'Shopify', 'Frontend Engineering'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${site}/#website`,
+      url: site,
+      name: 'Alp Senel',
+      inLanguage: t.htmlLang,
+      publisher: { '@id': `${site}/#person` },
+    },
+  ],
+};
+---
+
+<!DOCTYPE html>
+<html lang={t.htmlLang} data-theme="dark" data-accent="lime">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{t.title}</title>
+  <meta name="description" content={t.description} />
+  <meta name="author" content="Alp Senel" />
+  <link rel="canonical" href={canonical} />
+
+  <!-- hreflang: tell Google about both language versions -->
+  <link rel="alternate" hreflang="en" href={enUrl} />
+  <link rel="alternate" hreflang="tr" href={trUrl} />
+  <link rel="alternate" hreflang="x-default" href={enUrl} />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Alp Senel" />
+  <meta property="og:title" content={t.title} />
+  <meta property="og:description" content={t.description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content={t.ogLocale} />
+  <meta property="og:locale:alternate" content={t.ogLocaleAlt} />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={t.title} />
+  <meta name="twitter:description" content={t.description} />
+  <meta name="twitter:image" content={ogImage} />
+
+  <meta name="theme-color" content="#0c0e12" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</head>
+<body>
+  <div class="screen">
+    <canvas id="ripplecanvas"></canvas>
+    <div id="curring"></div>
+    <div id="curdot"></div>
+
+    <div class="layer">
+      <!-- top bar -->
+      <header class="topbar">
+        <span class="brand">{t.brand}</span>
+        <div class="topbar-actions">
+          <a class="lang" data-cursor href={t.otherLangHref} hreflang={lang === 'en' ? 'tr' : 'en'} aria-label="Change language">{t.otherLangLabel}</a>
+          <button data-cursor id="themeToggle" aria-label="Toggle theme">
+            <span class="dot"></span><span id="themeLabel">{t.lightsOn}</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="kicker">{t.kicker}</div>
+        <h1 set:html={t.h1html} />
+        <div class="sub" set:html={t.sub} />
+        <div class="scrollhint" set:html={t.scrollhint} />
+      </section>
+
+      <!-- INDEX -->
+      <section class="index">
+        <div class="label">{t.workLabel}</div>
+        {projects.map((p) => (
+          <a class="entry" href={p.url} target="_blank" rel="noopener" data-cursor data-reveal>
+            <span class="left">
+              <span class="num">{p.num}</span>
+              <span class="name">{p.name}</span>
+            </span>
+            <span class="year">{p.year} ↗</span>
+          </a>
+        ))}
+      </section>
+
+      <!-- CHANNEL -->
+      <section class="channel">
+        <div class="label">{t.channelLabel}</div>
+        <a data-cursor class="signal" href={`mailto:${contactEmail}`}>{t.signal}</a>
+        <div class="signed">
+          <span class="lbl">{t.signed}</span>
+          <span class="cipher" id="cipher">█▓█▓██▓█▓</span>
+        </div>
+      </section>
+
+      <footer class="site">
+        <span>{t.footLeft}</span>
+        <span>{t.footRight}</span>
+      </footer>
+    </div>
+  </div>
+
+  <script
+    is:inline
+    define:vars={{ lightsOn: t.lightsOn, lightsOff: t.lightsOff }}
+  >
+    // ---- theme toggle ----
+    (function () {
+      const root = document.documentElement;
+      const label = document.getElementById('themeLabel');
+      const syncLabel = function () {
+        label.textContent = root.getAttribute('data-theme') === 'dark' ? lightsOn : lightsOff;
+      };
+      syncLabel();
+      document.getElementById('themeToggle').addEventListener('click', function () {
+        root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        syncLabel();
+      });
+
+      // ---- self-scrambling signature — never resolves ----
+      const charset = '█▓▒░#@%&$?/\\*+=<>0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'.split('');
+      const cipherEl = document.getElementById('cipher');
+      setInterval(function () {
+        let s = '';
+        for (let i = 0; i < 11; i++) s += charset[Math.floor(Math.random() * charset.length)];
+        cipherEl.textContent = s;
+      }, 110);
+
+      // ---- scroll reveal ----
+      (function () {
+        const els = document.querySelectorAll('[data-reveal]');
+        els.forEach(function (el) {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(26px)';
+          el.style.transition = 'opacity .8s ease, transform .8s ease';
+        });
+        if ('IntersectionObserver' in window) {
+          const io = new IntersectionObserver(function (ents) {
+            ents.forEach(function (e) {
+              if (e.isIntersecting) {
+                e.target.style.opacity = '1';
+                e.target.style.transform = 'none';
+                io.unobserve(e.target);
+              }
+            });
+          }, { threshold: 0.2 });
+          els.forEach(function (el) { io.observe(el); });
+          setTimeout(function () {
+            els.forEach(function (el) { el.style.opacity = '1'; el.style.transform = 'none'; });
+          }, 2600);
+        } else {
+          els.forEach(function (el) { el.style.opacity = '1'; el.style.transform = 'none'; });
+        }
+      })();
+
+      // ---- cursor + ripple FX ----
+      (function () {
+        const canvas = document.getElementById('ripplecanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const host = document.querySelector('.screen');
+        const dot = document.getElementById('curdot');
+        const ring = document.getElementById('curring');
+        const fine = window.matchMedia('(pointer:fine)').matches;
+        const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+        const resize = function () {
+          canvas.width = innerWidth * DPR;
+          canvas.height = innerHeight * DPR;
+          canvas.style.width = innerWidth + 'px';
+          canvas.style.height = innerHeight + 'px';
+          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
+        const accent = function () {
+          return getComputedStyle(host).getPropertyValue('--accent').trim() || '#a8ff00';
+        };
+
+        let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, lx = mx, ly = my;
+        let hover = false;
+        const ripples = [];
+        const spawn = function (x, y, max) {
+          if (ripples.length > 140) return;
+          ripples.push({ x: x, y: y, r: 0, max: max, a: 1, col: accent() });
+        };
+
+        if (fine) {
+          host.style.cursor = 'none';
+          if (dot) dot.style.opacity = '1';
+          if (ring) ring.style.opacity = '1';
+        }
+
+        window.addEventListener('pointermove', function (e) {
+          mx = e.clientX;
+          my = e.clientY;
+          if (dot) dot.style.transform = 'translate(' + mx + 'px,' + my + 'px)';
+          const dx = mx - lx, dy = my - ly;
+          if (dx * dx + dy * dy > 180) { spawn(mx, my, 40); lx = mx; ly = my; }
+        });
+        window.addEventListener('pointerdown', function (e) { spawn(e.clientX, e.clientY, 170); });
+
+        document.querySelectorAll('[data-cursor]').forEach(function (el) {
+          el.addEventListener('pointerenter', function () { hover = true; });
+          el.addEventListener('pointerleave', function () { hover = false; });
+        });
+
+        const tick = function () {
+          rx += (mx - rx) * 0.16;
+          ry += (my - ry) * 0.16;
+          if (ring) ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) scale(' + (hover ? 2.2 : 1) + ')';
+          ctx.clearRect(0, 0, innerWidth, innerHeight);
+          for (let i = ripples.length - 1; i >= 0; i--) {
+            const p = ripples[i];
+            p.r += (p.max - p.r) * 0.04 + 0.35;
+            p.a *= 0.99;
+            if (p.a < 0.02) { ripples.splice(i, 1); continue; }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+            try { ctx.strokeStyle = p.col; } catch (e) { ctx.strokeStyle = '#a8ff00'; }
+            ctx.globalAlpha = p.a * 0.5;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+          requestAnimationFrame(tick);
+        };
+        tick();
+      })();
+    })();
+  </script>
+
+  <style is:global>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    :root {
+      --bg: oklch(0.155 0.012 256); --bg2: oklch(0.205 0.013 256);
+      --line: oklch(0.30 0.012 256); --fg: oklch(0.965 0.004 256); --fg2: oklch(0.66 0.012 256); --fg3: oklch(0.46 0.012 256);
+      --accent: oklch(0.87 0.17 132); --ink: oklch(0.16 0.02 256);
+    }
+    [data-theme="light"] {
+      --bg: oklch(0.975 0.004 256); --bg2: oklch(0.945 0.006 256);
+      --line: oklch(0.88 0.006 256); --fg: oklch(0.205 0.013 256); --fg2: oklch(0.46 0.012 256); --fg3: oklch(0.64 0.01 256);
+    }
+    [data-accent="cyan"] { --accent: oklch(0.83 0.13 218); }
+    [data-accent="violet"] { --accent: oklch(0.78 0.15 292); }
+    [data-accent="coral"] { --accent: oklch(0.77 0.16 32); }
+    body { background: var(--bg); color: var(--fg); font-family: 'Space Grotesk', sans-serif; -webkit-font-smoothing: antialiased; }
+    ::selection { background: var(--accent); color: var(--ink); }
+    @keyframes blink { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+
+    .screen { position: relative; min-height: 100vh; background: var(--bg); color: var(--fg); overflow-x: hidden; transition: background .5s ease, color .5s ease; }
+    .layer { position: relative; z-index: 1; }
+    #ripplecanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    #curring { position: fixed; top: 0; left: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 1px solid var(--accent); border-radius: 50%; z-index: 60; pointer-events: none; opacity: 0; transition: opacity .3s ease; will-change: transform; mix-blend-mode: difference; }
+    #curdot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; margin: -3px 0 0 -3px; background: var(--accent); border-radius: 50%; z-index: 61; pointer-events: none; opacity: 0; transition: opacity .3s ease; will-change: transform; }
+
+    header.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 24px clamp(20px, 4vw, 44px); mix-blend-mode: difference; color: #fff; }
+    header.topbar .brand { font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.02em; }
+    header.topbar .topbar-actions { display: flex; align-items: center; gap: clamp(16px, 3vw, 28px); }
+    header.topbar .lang { color: #fff; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; opacity: 0.7; transition: opacity .25s ease; }
+    header.topbar .lang:hover { opacity: 1; }
+    header.topbar button { cursor: pointer; background: none; border: none; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.04em; display: flex; align-items: center; gap: 8px; }
+    header.topbar .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: blink 2.4s infinite; }
+
+    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 120px clamp(20px, 4vw, 44px) 80px; max-width: 1300px; margin: 0 auto; }
+    .hero .kicker { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); letter-spacing: 0.04em; margin-bottom: 34px; }
+    .hero h1 { font-weight: 700; font-size: clamp(52px, 12vw, 150px); line-height: 0.92; letter-spacing: -0.04em; }
+    .hero h1 .accent { color: var(--accent); }
+    .hero .sub { margin-top: 40px; font-family: 'JetBrains Mono', monospace; font-size: clamp(12px, 1.5vw, 14px); color: var(--fg2); letter-spacing: 0.04em; }
+    .hero .scrollhint { margin-top: auto; padding-top: 80px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); letter-spacing: 0.08em; }
+
+    .index { max-width: 1300px; margin: 0 auto; padding: 40px clamp(20px, 4vw, 44px) 80px; }
+    .index .label { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); letter-spacing: 0.04em; margin-bottom: 8px; border-bottom: 1px solid var(--line); padding-bottom: 22px; }
+    .index .entry { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; text-decoration: none; color: var(--fg); border-bottom: 1px solid var(--line); padding: clamp(20px, 3.4vw, 42px) 0; transition: color .3s ease; }
+    .index .entry:hover { color: var(--accent); }
+    .index .entry .left { display: flex; align-items: baseline; gap: clamp(14px, 2.5vw, 38px); min-width: 0; }
+    .index .entry .num { font-family: 'JetBrains Mono', monospace; font-size: clamp(11px, 1.3vw, 14px); color: var(--fg3); flex-shrink: 0; }
+    .index .entry .name { font-weight: 600; font-size: clamp(34px, 7.5vw, 92px); line-height: 0.95; letter-spacing: -0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .index .entry .year { font-family: 'JetBrains Mono', monospace; font-size: clamp(11px, 1.3vw, 14px); color: var(--fg3); flex-shrink: 0; white-space: nowrap; }
+
+    .channel { max-width: 1300px; margin: 0 auto; padding: 90px clamp(20px, 4vw, 44px) 70px; }
+    .channel .label { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); letter-spacing: 0.04em; margin-bottom: 30px; }
+    .channel a.signal { display: inline-block; text-decoration: none; color: var(--fg); font-weight: 600; font-size: clamp(34px, 7vw, 84px); letter-spacing: -0.03em; line-height: 1; transition: color .3s ease; }
+    .channel a.signal:hover { color: var(--accent); }
+    .channel .signed { margin-top: 48px; display: flex; align-items: center; gap: 14px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg3); flex-wrap: wrap; }
+    .channel .signed .lbl { color: var(--fg2); }
+    .channel .signed .cipher { color: var(--accent); letter-spacing: 0.1em; }
+
+    footer.site { border-top: 1px solid var(--line); max-width: 1300px; margin: 0 auto; padding: 24px clamp(20px, 4vw, 44px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); }
+  </style>
+</body>
+</html>
