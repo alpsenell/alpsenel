@@ -199,7 +199,10 @@ const jsonLd = {
         }
       })();
 
-      // ---- cursor + ripple FX ----
+      // ---- cursor follow + water-surface ripple FX ----
+      // A height-field water simulation (damped wave equation). Pointer moves
+      // and clicks drop disturbances that spread, interfere and fade like
+      // ripples on a dark pool, lit from the top-left with an accent sheen.
       (function () {
         const canvas = document.getElementById('ripplecanvas');
         if (!canvas) return;
@@ -208,70 +211,122 @@ const jsonLd = {
         const dot = document.getElementById('curdot');
         const ring = document.getElementById('curring');
         const fine = window.matchMedia('(pointer:fine)').matches;
-        const DPR = Math.min(window.devicePixelRatio || 1, 2);
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        const resize = function () {
-          canvas.width = innerWidth * DPR;
-          canvas.height = innerHeight * DPR;
-          canvas.style.width = innerWidth + 'px';
-          canvas.style.height = innerHeight + 'px';
-          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-        };
-        resize();
-        window.addEventListener('resize', resize);
+        const SCALE = 6;     // px per simulation cell
+        const DAMP = 0.96;   // wave energy retained per frame
+        let cols, rows, cur, prev, off, offCtx, img, accent = [163, 230, 53];
 
-        const accent = function () {
-          return getComputedStyle(host).getPropertyValue('--accent').trim() || '#a8ff00';
-        };
+        function resolveAccent() {
+          try {
+            offCtx.fillStyle = getComputedStyle(host).getPropertyValue('--accent').trim() || '#a3e635';
+            offCtx.fillRect(0, 0, 1, 1);
+            const d = offCtx.getImageData(0, 0, 1, 1).data;
+            accent = [d[0], d[1], d[2]];
+          } catch (e) {}
+        }
 
-        let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, lx = mx, ly = my;
+        function setup() {
+          cols = Math.max(8, Math.ceil(window.innerWidth / SCALE));
+          rows = Math.max(8, Math.ceil(window.innerHeight / SCALE));
+          cur = new Float32Array(cols * rows);
+          prev = new Float32Array(cols * rows);
+          off = document.createElement('canvas');
+          off.width = cols; off.height = rows;
+          offCtx = off.getContext('2d', { willReadFrequently: true });
+          img = offCtx.createImageData(cols, rows);
+          canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+          canvas.style.width = window.innerWidth + 'px'; canvas.style.height = window.innerHeight + 'px';
+          resolveAccent();
+        }
+        setup();
+        window.addEventListener('resize', setup);
+
+        // drop a soft, radius-stamped disturbance so the rings stay circular
+        function drop(px, py, power) {
+          const cx = Math.round(px / SCALE), cy = Math.round(py / SCALE), rad = 2;
+          for (let y = -rad; y <= rad; y++) {
+            for (let x = -rad; x <= rad; x++) {
+              const gx = cx + x, gy = cy + y;
+              if (gx < 1 || gy < 1 || gx >= cols - 1 || gy >= rows - 1) continue;
+              const d = Math.sqrt(x * x + y * y);
+              if (d > rad) continue;
+              prev[gy * cols + gx] -= power * (1 - d / rad);
+            }
+          }
+        }
+
+        // ---- cursor dot + ring follow ----
+        let mx = window.innerWidth / 2, my = window.innerHeight / 2, rx = mx, ry = my, lx = mx, ly = my;
         let hover = false;
-        const ripples = [];
-        const spawn = function (x, y, max) {
-          if (ripples.length > 140) return;
-          ripples.push({ x: x, y: y, r: 0, max: max, a: 1, col: accent() });
-        };
-
         if (fine) {
           host.style.cursor = 'none';
           if (dot) dot.style.opacity = '1';
           if (ring) ring.style.opacity = '1';
         }
-
         window.addEventListener('pointermove', function (e) {
-          mx = e.clientX;
-          my = e.clientY;
+          mx = e.clientX; my = e.clientY;
           if (dot) dot.style.transform = 'translate(' + mx + 'px,' + my + 'px)';
-          const dx = mx - lx, dy = my - ly;
-          if (dx * dx + dy * dy > 180) { spawn(mx, my, 40); lx = mx; ly = my; }
-        });
-        window.addEventListener('pointerdown', function (e) { spawn(e.clientX, e.clientY, 170); });
+          const dx = mx - lx, dy = my - ly, dist2 = dx * dx + dy * dy;
+          if (dist2 > 100) { drop(mx, my, Math.min(0.5 + dist2 * 0.0007, 2.2)); lx = mx; ly = my; }
+        }, { passive: true });
+        window.addEventListener('pointerdown', function (e) { drop(e.clientX, e.clientY, 4.5); }, { passive: true });
 
         document.querySelectorAll('[data-cursor]').forEach(function (el) {
           el.addEventListener('pointerenter', function () { hover = true; });
           el.addEventListener('pointerleave', function () { hover = false; });
         });
 
-        const tick = function () {
-          rx += (mx - rx) * 0.16;
-          ry += (my - ry) * 0.16;
-          if (ring) ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) scale(' + (hover ? 2.2 : 1) + ')';
-          ctx.clearRect(0, 0, innerWidth, innerHeight);
-          for (let i = ripples.length - 1; i >= 0; i--) {
-            const p = ripples[i];
-            p.r += (p.max - p.r) * 0.04 + 0.35;
-            p.a *= 0.99;
-            if (p.a < 0.02) { ripples.splice(i, 1); continue; }
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, 6.2832);
-            try { ctx.strokeStyle = p.col; } catch (e) { ctx.strokeStyle = '#a8ff00'; }
-            ctx.globalAlpha = p.a * 0.5;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
+        // gentle ambient drips so the surface always breathes
+        let ambient = 60;
+        function maybeAmbient() {
+          if (reduce) return;
+          if (--ambient <= 0) {
+            ambient = 100 + Math.floor(Math.random() * 140);
+            drop(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 1.2);
           }
-          ctx.globalAlpha = 1;
+        }
+
+        function tick() {
+          rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16;
+          if (ring) ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) scale(' + (hover ? 2.2 : 1) + ')';
+
+          maybeAmbient();
+
+          // propagate the wave field
+          for (let y = 1; y < rows - 1; y++) {
+            const r = y * cols;
+            for (let x = 1; x < cols - 1; x++) {
+              const i = r + x;
+              cur[i] = ((prev[i - 1] + prev[i + 1] + prev[i - cols] + prev[i + cols]) * 0.5 - cur[i]) * DAMP;
+            }
+          }
+          const tmp = cur; cur = prev; prev = tmp; // prev now holds the newest field
+
+          // render height field as light on water
+          const data = img.data, ar = accent[0], ag = accent[1], ab = accent[2];
+          for (let y = 1; y < rows - 1; y++) {
+            const r = y * cols;
+            for (let x = 1; x < cols - 1; x++) {
+              const i = r + x;
+              const h = prev[i];
+              const spec = Math.max(0, (prev[i - 1] - prev[i + 1]) * 0.7 + (prev[i - cols] - prev[i + cols]) * 0.9);
+              let a = Math.abs(h) * 30 + spec * 24; if (a > 255) a = 255;
+              let sp = spec * 80; if (sp > 255) sp = 255;
+              const p = i * 4;
+              data[p] = ar + sp > 255 ? 255 : ar + sp;
+              data[p + 1] = ag + sp > 255 ? 255 : ag + sp;
+              data[p + 2] = ab + sp > 255 ? 255 : ab + sp;
+              data[p + 3] = a;
+            }
+          }
+          offCtx.putImageData(img, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.imageSmoothingEnabled = true;
+          ctx.drawImage(off, 0, 0, canvas.width, canvas.height);
+
           requestAnimationFrame(tick);
-        };
+        }
         tick();
       })();
     })();
