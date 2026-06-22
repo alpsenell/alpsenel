@@ -13,7 +13,6 @@ export interface Strings {
   kicker: string;
   /** Trusted static markup for the hero headline (includes the accent span). */
   h1html: string;
-  sub: string;
   scrollhint: string;
   workLabel: string;
   channelLabel: string;
@@ -21,6 +20,11 @@ export interface Strings {
   signed: string;
   footLeft: string;
   footRight: string;
+  /** Project "window" modal labels. */
+  briefLabel: string;
+  stackLabel: string;
+  openLive: string;
+  closeLabel: string;
   /** Label + href of the OTHER language, for the header toggle. */
   otherLangLabel: string;
   otherLangHref: string;
@@ -39,7 +43,6 @@ export const strings: Record<Lang, Strings> = {
     lightsOff: 'LIGHTS OFF',
     kicker: '// identity withheld',
     h1html: 'Anonymous<br />by <span class="accent">design.</span>',
-    sub: 'no name &nbsp;·&nbsp; no face &nbsp;·&nbsp; only the work',
     scrollhint: '↓ &nbsp; FIVE ENTRIES',
     workLabel: '// the work',
     channelLabel: '// open a channel',
@@ -47,6 +50,10 @@ export const strings: Record<Lang, Strings> = {
     signed: 'signed',
     footLeft: '© 2026 — name withheld',
     footRight: 'built in the dark',
+    briefLabel: '// brief',
+    stackLabel: 'STACK',
+    openLive: 'OPEN LIVE ↗',
+    closeLabel: 'close',
     otherLangLabel: 'TR',
     otherLangHref: '/tr/',
   },
@@ -62,7 +69,6 @@ export const strings: Record<Lang, Strings> = {
     lightsOff: 'IŞIKLAR KAPALI',
     kicker: '// kimlik gizli',
     h1html: 'Tasarım gereği<br /><span class="accent">anonim.</span>',
-    sub: 'ne isim &nbsp;·&nbsp; ne yüz &nbsp;·&nbsp; yalnızca iş',
     scrollhint: '↓ &nbsp; BEŞ KAYIT',
     workLabel: '// işler',
     channelLabel: '// kanal aç',
@@ -70,6 +76,10 @@ export const strings: Record<Lang, Strings> = {
     signed: 'imzalı',
     footLeft: '© 2026 — isim gizli',
     footRight: 'karanlıkta üretildi',
+    briefLabel: '// özet',
+    stackLabel: 'TEKNOLOJİ',
+    openLive: 'CANLI AÇ ↗',
+    closeLabel: 'kapat',
     otherLangLabel: 'EN',
     otherLangHref: '/',
   },
