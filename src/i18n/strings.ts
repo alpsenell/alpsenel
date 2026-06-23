@@ -10,10 +10,12 @@ export interface Strings {
   brand: string;
   lightsOn: string;
   lightsOff: string;
-  kicker: string;
-  /** Trusted static markup for the hero headline (includes the accent span). */
+  /** Trusted static markup for the hero headline — word spans drive the magnetic effect. */
   h1html: string;
-  scrollhint: string;
+  metaBasedLabel: string;
+  metaBasedValue: string;
+  metaChannelLabel: string;
+  scrollLabel: string;
   workLabel: string;
   channelLabel: string;
   signal: string;
@@ -41,9 +43,11 @@ export const strings: Record<Lang, Strings> = {
     brand: 'anon://operator',
     lightsOn: 'LIGHTS ON',
     lightsOff: 'LIGHTS OFF',
-    kicker: '// identity withheld',
-    h1html: 'Anonymous<br />by <span class="accent">design.</span>',
-    scrollhint: '↓ &nbsp; FIVE ENTRIES',
+    h1html: '<span data-word>Distinctive</span><br /><span data-word>sites,</span> <span data-word data-accent>shipped.</span>',
+    metaBasedLabel: 'BASED',
+    metaBasedValue: 'remote / İstanbul',
+    metaChannelLabel: 'CHANNEL',
+    scrollLabel: 'SCROLL TO EXPLORE',
     workLabel: '// the work',
     channelLabel: '// open a channel',
     signal: 'send a signal ↗',
@@ -67,9 +71,11 @@ export const strings: Record<Lang, Strings> = {
     brand: 'anon://operator',
     lightsOn: 'IŞIKLAR AÇIK',
     lightsOff: 'IŞIKLAR KAPALI',
-    kicker: '// kimlik gizli',
-    h1html: 'Tasarım gereği<br /><span class="accent">anonim.</span>',
-    scrollhint: '↓ &nbsp; BEŞ KAYIT',
+    h1html: '<span data-word>Özgün</span><br /><span data-word>siteler,</span> <span data-word data-accent>yayında.</span>',
+    metaBasedLabel: 'KONUM',
+    metaBasedValue: 'remote / İstanbul',
+    metaChannelLabel: 'KANAL',
+    scrollLabel: 'AŞAĞI KAYDIR',
     workLabel: '// işler',
     channelLabel: '// kanal aç',
     signal: 'sinyal gönder ↗',

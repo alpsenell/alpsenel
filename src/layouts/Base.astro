@@ -120,13 +120,29 @@ const clientProjects = projects.map((p) => ({
 
       <!-- HERO -->
       <section class="hero">
-        <div class="kicker">{t.kicker}</div>
-        <h1 set:html={t.h1html} />
-        <div class="scrollhint" set:html={t.scrollhint} />
+        <div class="hero-row">
+          <div class="hero-head">
+            <h1 data-head set:html={t.h1html} />
+          </div>
+          <aside class="hero-meta">
+            <div>
+              <div class="meta-label">{t.metaBasedLabel}</div>
+              <div class="meta-value">{t.metaBasedValue}</div>
+            </div>
+            <div>
+              <div class="meta-label">{t.metaChannelLabel}</div>
+              <a class="meta-link" data-cursor href={`mailto:${contactEmail}`}>{t.signal}</a>
+            </div>
+          </aside>
+        </div>
+        <a class="scroll-explore" data-cursor href="#work">
+          {t.scrollLabel}
+          <span class="chevrons"><span></span><span></span><span></span></span>
+        </a>
       </section>
 
       <!-- INDEX -->
-      <section class="index">
+      <section id="work" class="index">
         <div class="label">{t.workLabel}</div>
         {projects.map((p, i) => (
           <a class="entry" href={p.url} target="_blank" rel="noopener" data-cursor data-reveal data-index={i}>
@@ -366,6 +382,26 @@ const clientProjects = projects.map((p) => ({
         // ---- cursor dot + ring follow ----
         let mx = window.innerWidth / 2, my = window.innerHeight / 2, rx = mx, ry = my, lx = mx, ly = my;
         let hover = false;
+
+        // ---- magnetic headline: split words into per-character spans ----
+        let pointerMoved = false;
+        const headEl = document.querySelector('[data-head]');
+        const magChars = [];
+        if (headEl) headEl.querySelectorAll('[data-word]').forEach(function (w) {
+          const isAccent = w.hasAttribute('data-accent');
+          w.style.display = 'inline-block'; w.style.whiteSpace = 'nowrap';
+          const text = w.textContent; w.textContent = '';
+          for (const ch of text) {
+            const isSpace = (ch === ' ' || ch === ' ');
+            const s = document.createElement('span');
+            s.textContent = isSpace ? ' ' : ch;
+            s.style.display = 'inline-block';
+            s.style.willChange = 'transform';
+            if (isAccent) s.style.color = 'var(--accent)';
+            w.appendChild(s);
+            magChars.push({ el: s, tx: 0, ty: 0 });
+          }
+        });
         if (fine) {
           host.style.cursor = 'none';
           if (dot) dot.style.opacity = '1';
@@ -373,6 +409,7 @@ const clientProjects = projects.map((p) => ({
         }
         window.addEventListener('pointermove', function (e) {
           mx = e.clientX; my = e.clientY;
+          pointerMoved = true;
           if (dot) dot.style.transform = 'translate(' + mx + 'px,' + my + 'px)';
           const dx = mx - lx, dy = my - ly, dist2 = dx * dx + dy * dy;
           if (dist2 > 90) { drop(mx, my, Math.min(1.3 + dist2 * 0.0012, 3.8)); lx = mx; ly = my; }
@@ -397,6 +434,22 @@ const clientProjects = projects.map((p) => ({
         function tick() {
           rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16;
           if (ring) ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) scale(' + (hover ? 2.2 : 1) + ')';
+
+          // magnetic headline — recompute centers each frame so it survives scroll
+          if (pointerMoved && magChars.length) {
+            const R = 220, MK = 1.5;
+            for (let m = 0; m < magChars.length; m++) {
+              const c = magChars[m];
+              const b = c.el.getBoundingClientRect();
+              const ccx = b.left + b.width / 2, ccy = b.top + b.height / 2;
+              let tx = 0, ty = 0;
+              const ddx = mx - (ccx - c.tx), ddy = my - (ccy - c.ty), dd = Math.hypot(ddx, ddy);
+              if (dd < R) { const ff = 1 - dd / R; tx = ddx * ff * 0.4 * MK; ty = ddy * ff * 0.4 * MK; }
+              c.tx += (tx - c.tx) * 0.18; c.ty += (ty - c.ty) * 0.18;
+              const sc = Math.min(1 + Math.hypot(c.tx, c.ty) / 60, 1.45);
+              c.el.style.transform = 'translate(' + c.tx + 'px,' + c.ty + 'px) scale(' + sc + ')';
+            }
+          }
 
           maybeAmbient();
 
@@ -464,6 +517,7 @@ const clientProjects = projects.map((p) => ({
     body { background: var(--bg); color: var(--fg); font-family: 'Space Grotesk', sans-serif; -webkit-font-smoothing: antialiased; }
     ::selection { background: var(--accent); color: var(--ink); }
     @keyframes blink { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+    @keyframes chevFall { 0% { opacity: 0; transform: translateY(-5px) rotate(45deg); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateY(5px) rotate(45deg); } }
 
     .screen { position: relative; min-height: 100vh; background: var(--bg); color: var(--fg); overflow-x: hidden; transition: background .5s ease, color .5s ease; }
     .layer { position: relative; z-index: 1; }
@@ -471,7 +525,7 @@ const clientProjects = projects.map((p) => ({
     #curring { position: fixed; top: 0; left: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 1px solid var(--accent); border-radius: 50%; z-index: 60; pointer-events: none; opacity: 0; transition: opacity .3s ease; will-change: transform; mix-blend-mode: difference; }
     #curdot { position: fixed; top: 0; left: 0; width: 6px; height: 6px; margin: -3px 0 0 -3px; background: var(--accent); border-radius: 50%; z-index: 61; pointer-events: none; opacity: 0; transition: opacity .3s ease; will-change: transform; }
 
-    header.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 24px clamp(20px, 4vw, 44px); color: var(--fg); transition: color .5s ease; }
+    header.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 24px clamp(28px, 5vw, 72px); color: var(--fg); transition: color .5s ease; }
     header.topbar .brand { font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.02em; }
     header.topbar .topbar-actions { display: flex; align-items: center; gap: clamp(16px, 3vw, 28px); }
     header.topbar .lang { color: var(--fg2); text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; transition: color .25s ease; }
@@ -479,13 +533,28 @@ const clientProjects = projects.map((p) => ({
     header.topbar button { cursor: pointer; background: none; border: none; color: var(--fg); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.04em; display: flex; align-items: center; gap: 8px; }
     header.topbar .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: blink 2.4s infinite; }
 
-    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 120px clamp(20px, 4vw, 44px) 80px; max-width: 1300px; margin: 0 auto; }
-    .hero .kicker { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); letter-spacing: 0.04em; margin-bottom: 34px; }
-    .hero h1 { font-weight: 700; font-size: clamp(52px, 12vw, 150px); line-height: 0.92; letter-spacing: -0.04em; }
-    .hero h1 .accent { color: var(--accent); }
-    .hero .scrollhint { margin-top: auto; padding-top: 80px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); letter-spacing: 0.08em; }
+    .hero { min-height: 100vh; display: flex; flex-direction: column; padding: 0 clamp(28px, 5vw, 72px); max-width: 1480px; margin: 0 auto; }
+    .hero-row { flex: 1; display: flex; align-items: center; gap: clamp(40px, 6vw, 88px); padding-top: 128px; padding-bottom: 72px; }
+    .hero-head { flex: 1; min-width: 0; }
+    .hero h1 { font-weight: 700; font-size: clamp(60px, 9.5vw, 138px); line-height: 0.9; letter-spacing: -0.045em; margin: 0; color: var(--fg); }
+    .hero h1 [data-accent] { color: var(--accent); }
+    .hero-meta { width: 236px; flex: none; border-left: 1px solid var(--line); padding-left: 28px; display: flex; flex-direction: column; gap: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; }
+    .hero-meta .meta-label { color: var(--fg3); letter-spacing: 0.12em; }
+    .hero-meta .meta-value { color: var(--fg); margin-top: 6px; }
+    .hero-meta .meta-link { color: var(--fg); margin-top: 6px; text-decoration: none; display: inline-block; transition: color .25s ease; }
+    .hero-meta .meta-link:hover { color: var(--accent); }
+    .scroll-explore { align-self: flex-start; padding-bottom: 40px; display: inline-flex; flex-direction: column; align-items: center; gap: 16px; text-decoration: none; color: var(--fg2); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; transition: color .25s ease; }
+    .scroll-explore:hover { color: var(--accent); }
+    .scroll-explore .chevrons { display: flex; flex-direction: column; align-items: center; gap: 7px; height: 34px; }
+    .scroll-explore .chevrons span { width: 12px; height: 12px; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); animation: chevFall 1.5s ease-in-out infinite; }
+    .scroll-explore .chevrons span:nth-child(2) { animation-delay: 0.18s; }
+    .scroll-explore .chevrons span:nth-child(3) { animation-delay: 0.36s; }
+    @media (max-width: 760px) {
+      .hero-row { flex-direction: column; align-items: flex-start; gap: 40px; padding-top: 120px; }
+      .hero-meta { width: 100%; border-left: none; border-top: 1px solid var(--line); padding-left: 0; padding-top: 26px; }
+    }
 
-    .index { max-width: 1300px; margin: 0 auto; padding: 40px clamp(20px, 4vw, 44px) 80px; }
+    .index { max-width: 1480px; margin: 0 auto; padding: 40px clamp(28px, 5vw, 72px) 80px; }
     .index .label { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); letter-spacing: 0.04em; margin-bottom: 8px; border-bottom: 1px solid var(--line); padding-bottom: 22px; }
     .index .entry { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; text-decoration: none; color: var(--fg); border-bottom: 1px solid var(--line); padding: clamp(20px, 3.4vw, 42px) 0; transition: color .3s ease; }
     .index .entry:hover { color: var(--accent); }
@@ -494,7 +563,7 @@ const clientProjects = projects.map((p) => ({
     .index .entry .name { font-weight: 600; font-size: clamp(34px, 7.5vw, 92px); line-height: 0.95; letter-spacing: -0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .index .entry .year { font-family: 'JetBrains Mono', monospace; font-size: clamp(11px, 1.3vw, 14px); color: var(--fg3); flex-shrink: 0; white-space: nowrap; }
 
-    .channel { max-width: 1300px; margin: 0 auto; padding: 90px clamp(20px, 4vw, 44px) 70px; }
+    .channel { max-width: 1480px; margin: 0 auto; padding: 90px clamp(28px, 5vw, 72px) 70px; }
     .channel .label { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); letter-spacing: 0.04em; margin-bottom: 30px; }
     .channel a.signal { display: inline-block; text-decoration: none; color: var(--fg); font-weight: 600; font-size: clamp(34px, 7vw, 84px); letter-spacing: -0.03em; line-height: 1; transition: color .3s ease; }
     .channel a.signal:hover { color: var(--accent); }
@@ -502,7 +571,7 @@ const clientProjects = projects.map((p) => ({
     .channel .signed .lbl { color: var(--fg2); }
     .channel .signed .cipher { color: var(--accent); letter-spacing: 0.1em; }
 
-    footer.site { border-top: 1px solid var(--line); max-width: 1300px; margin: 0 auto; padding: 24px clamp(20px, 4vw, 44px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); }
+    footer.site { border-top: 1px solid var(--line); max-width: 1480px; margin: 0 auto; padding: 24px clamp(28px, 5vw, 72px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); }
 
     /* project "window" — full-page animated takeover */
     .fullwin { position: fixed; inset: 0; z-index: 90; background: var(--bg); color: var(--fg); overflow-y: auto;
@@ -512,14 +581,14 @@ const clientProjects = projects.map((p) => ({
     .fullwin.open { visibility: visible; opacity: 1; clip-path: circle(var(--r, 150vmax) at var(--ox, 50%) var(--oy, 50%));
       transition: clip-path .72s cubic-bezier(.76, 0, .24, 1), opacity .2s ease, visibility 0s; }
     .fw-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-    .fw-bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 22px clamp(20px, 4vw, 44px); border-bottom: 1px solid var(--line); background: color-mix(in oklab, var(--bg) 84%, transparent); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
+    .fw-bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 22px clamp(28px, 5vw, 72px); border-bottom: 1px solid var(--line); background: color-mix(in oklab, var(--bg) 84%, transparent); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
     .fw-bar .win-dots { display: flex; gap: 7px; }
     .fw-bar .win-dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); display: inline-block; }
     .fw-bar .win-dots i:first-child { background: var(--accent); }
     .fw-addr { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg3); letter-spacing: 0.04em; }
     .fw-close { margin-left: auto; display: flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; color: var(--fg2); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.06em; transition: color .2s ease; }
     .fw-close:hover { color: var(--accent); }
-    .fw-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: clamp(48px, 12vh, 150px) clamp(20px, 4vw, 44px) 110px; }
+    .fw-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: clamp(48px, 12vh, 150px) clamp(28px, 5vw, 72px) 110px; }
     .fw-meta { display: flex; gap: 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg3); letter-spacing: 0.08em; }
     .fw-name { font-weight: 700; font-size: clamp(46px, 11vw, 140px); line-height: 0.95; letter-spacing: -0.04em; margin-top: 18px; color: var(--fg); }
     .fw-brief { margin-top: 34px; color: var(--fg2); font-size: clamp(16px, 2.2vw, 24px); line-height: 1.5; max-width: 60ch; }
