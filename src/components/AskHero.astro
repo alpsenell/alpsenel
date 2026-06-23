@@ -1,0 +1,119 @@
+---
+import type { Lang } from '../i18n/strings';
+import { strings } from '../i18n/strings';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = strings[lang];
+---
+<div class="ask">
+  <div class="ask-label">{t.askLabel}</div>
+  <form class="ask-form" data-ask data-lang={lang}>
+    <input
+      class="ask-input"
+      type="text"
+      maxlength="500"
+      autocomplete="off"
+      placeholder={t.askPlaceholder}
+      aria-label={t.askPlaceholder}
+      data-ask-input
+    />
+    <button class="ask-send" type="submit" data-cursor aria-label="Send">↵</button>
+  </form>
+  <div class="ask-chips" data-ask-chips>
+    {t.askChips.map((c) => (
+      <button class="ask-chip" type="button" data-cursor data-chip={c}>{c}</button>
+    ))}
+  </div>
+  <div class="ask-answer" data-ask-answer hidden></div>
+  <div class="ask-status" data-ask-status></div>
+</div>
+
+<script
+  is:inline
+  define:vars={{ asking: t.asking, questionsLeft: t.questionsLeft, limitReached: t.limitReached, askError: t.askError, lang }}
+>
+  (function () {
+    const root = document.querySelector('[data-ask]');
+    if (!root) return;
+    const input = root.querySelector('[data-ask-input]');
+    const chipsWrap = document.querySelector('[data-ask-chips]');
+    const answer = document.querySelector('[data-ask-answer]');
+    const status = document.querySelector('[data-ask-status]');
+    let busy = false;
+    let locked = false;
+
+    function setStatus(text) { status.textContent = text || ''; }
+
+    async function ask(question) {
+      if (busy || locked || !question.trim()) return;
+      busy = true;
+      input.value = question;
+      input.disabled = true;
+      chipsWrap.style.display = 'none';
+      answer.hidden = false;
+      answer.textContent = '';
+      setStatus(asking);
+
+      let res;
+      try {
+        res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ question: question.trim(), lang }),
+        });
+      } catch (e) {
+        setStatus(askError); reset(); return;
+      }
+
+      if (res.status === 429) {
+        const d = await res.json().catch(() => ({}));
+        answer.hidden = true;
+        setStatus(d.message || limitReached);
+        locked = true; input.disabled = true; busy = false;
+        return;
+      }
+      if (!res.ok || !res.body) {
+        const d = await res.json().catch(() => ({}));
+        setStatus(d.message || askError); reset(); return;
+      }
+
+      setStatus('');
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        answer.textContent += dec.decode(value, { stream: true });
+      }
+      const remaining = res.headers.get('x-ratelimit-remaining');
+      if (remaining != null) setStatus(questionsLeft.replace('{n}', remaining));
+      reset();
+    }
+
+    function reset() {
+      busy = false;
+      if (!locked) { input.disabled = false; chipsWrap.style.display = ''; input.value = ''; input.focus(); }
+    }
+
+    root.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); });
+    chipsWrap.querySelectorAll('[data-chip]').forEach(function (b) {
+      b.addEventListener('click', function () { ask(b.getAttribute('data-chip')); });
+    });
+  })();
+</script>
+
+<style>
+  .ask { max-width: 760px; }
+  .ask-label { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg3); letter-spacing: 0.12em; margin-bottom: 22px; }
+  .ask-form { display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+  .ask-input { flex: 1; min-width: 0; background: none; border: none; outline: none; color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: clamp(24px, 4.4vw, 44px); letter-spacing: -0.02em; caret-color: var(--accent); }
+  .ask-input::placeholder { color: var(--fg3); }
+  .ask-input:disabled { opacity: 0.55; }
+  .ask-send { flex: none; background: none; border: 1px solid var(--line); color: var(--accent); border-radius: 10px; width: 48px; height: 48px; cursor: pointer; font-size: 20px; transition: border-color .2s ease; }
+  .ask-send:hover { border-color: var(--accent); }
+  .ask-chips { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .ask-chip { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 9px 15px; cursor: pointer; transition: color .2s ease, border-color .2s ease; }
+  .ask-chip:hover { color: var(--accent); border-color: var(--accent); }
+  .ask-answer { margin-top: 30px; color: var(--fg); font-size: clamp(16px, 2vw, 21px); line-height: 1.6; max-width: 60ch; }
+  .ask-status { margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); letter-spacing: 0.06em; min-height: 16px; }
+</style>

@@ -2,6 +2,7 @@
 import type { Lang } from '../i18n/strings';
 import { strings } from '../i18n/strings';
 import { projects, contactEmail } from '../data/projects';
+import AskHero from '../components/AskHero.astro';
 
 interface Props {
   lang: Lang;
@@ -122,7 +123,7 @@ const clientProjects = projects.map((p) => ({
       <section class="hero">
         <div class="hero-row">
           <div class="hero-head">
-            <h1 data-head set:html={t.h1html} />
+            <AskHero lang={lang} />
           </div>
           <aside class="hero-meta">
             <div>
