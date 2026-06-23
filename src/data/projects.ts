@@ -29,7 +29,7 @@ export const projects: Project[] = [
   {
     num: '02',
     name: 'YAZ EVI',
-    year: '2025',
+    year: '2025 — today',
     url: 'https://www.yaz-evi.com/',
     handle: 'yaz-evi',
     tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP'],
@@ -41,7 +41,7 @@ export const projects: Project[] = [
   {
     num: '03',
     name: 'INO BEAUTY',
-    year: '2025',
+    year: '2026 — today',
     url: 'https://inobeauty.com.tr/',
     handle: 'ino-beauty',
     tech: ['Shopify', 'Liquid', 'JavaScript'],
@@ -53,7 +53,7 @@ export const projects: Project[] = [
   {
     num: '04',
     name: 'URBAN CARE',
-    year: '2025',
+    year: '2026 — today',
     url: 'https://urbancare.com.tr/',
     handle: 'urban-care',
     tech: ['Shopify', 'Liquid', 'JavaScript'],
@@ -65,7 +65,7 @@ export const projects: Project[] = [
   {
     num: '05',
     name: 'VOLTA MOTOR',
-    year: '2024',
+    year: '2026 — today',
     url: 'https://www.voltamotorbuyukcekmece.com/',
     handle: 'volta-motor',
     tech: ['Next.js', 'TypeScript', 'Tailwind CSS'],
@@ -77,7 +77,7 @@ export const projects: Project[] = [
   {
     num: '06',
     name: 'STEPHEN WEBSTER',
-    year: '2021–2024',
+    year: '2023 — today',
     url: 'https://www.stephenwebster.com/',
     handle: 'stephen-webster',
     tech: ['Shopify Plus', 'Liquid', 'JavaScript'],
@@ -89,7 +89,7 @@ export const projects: Project[] = [
   {
     num: '07',
     name: 'STERLING HOME',
-    year: '2021–2024',
+    year: '2026 — today',
     url: 'https://sterlinghome.co.uk/',
     handle: 'sterling-home',
     tech: ['Shopify', 'Liquid', 'JavaScript'],
@@ -101,7 +101,7 @@ export const projects: Project[] = [
   {
     num: '08',
     name: 'WILKINSON SWORD',
-    year: '2021–2024',
+    year: '2024 — today',
     url: 'https://www.wilkinsonsword.com/',
     handle: 'wilkinson-sword',
     tech: ['Shopify Plus', 'Liquid', 'JavaScript'],
@@ -113,7 +113,7 @@ export const projects: Project[] = [
   {
     num: '09',
     name: 'BULLDOG SKINCARE',
-    year: '2021–2024',
+    year: '2025 — today',
     url: 'https://www.bulldogskincare.com/',
     handle: 'bulldog-skincare',
     tech: ['Shopify Plus', 'Liquid', 'JavaScript'],
@@ -125,7 +125,7 @@ export const projects: Project[] = [
   {
     num: '10',
     name: 'NOBODY\'S CHILD',
-    year: '2021–2024',
+    year: '2024 — today',
     url: 'https://www.nobodyschild.com/',
     handle: 'nobodys-child',
     tech: ['Shopify Plus', 'Liquid', 'JavaScript'],
@@ -137,7 +137,7 @@ export const projects: Project[] = [
   {
     num: '11',
     name: 'A COLLECTED MAN',
-    year: '2021–2024',
+    year: '2022 — today',
     url: 'https://www.acollectedman.com/',
     handle: 'a-collected-man',
     tech: ['Shopify', 'Liquid', 'JavaScript'],
