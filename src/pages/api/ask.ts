@@ -88,7 +88,7 @@ export function createAskHandler(deps: Deps) {
 
 const handler = createAskHandler({
   getRedis: () => Redis.fromEnv() as unknown as KvLike,
-  getAnthropic: () => new Anthropic() as any,
+  getAnthropic: () => new Anthropic({ timeout: 20000, maxRetries: 1 }) as any,
 });
 
 export const POST: APIRoute = ({ request }) => handler(request);

@@ -21,4 +21,9 @@ describe('buildSystemPrompt', () => {
     expect(p).toContain('decline');
     expect(p).toContain('ignore');
   });
+
+  it('does not expose TODO placeholder text in the prompt', () => {
+    const p = buildSystemPrompt('en');
+    expect(p.toUpperCase()).not.toContain('TODO:');
+  });
 });
