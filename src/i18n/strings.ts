@@ -16,6 +16,13 @@ export interface Strings {
   metaBasedValue: string;
   metaChannelLabel: string;
   scrollLabel: string;
+  askLabel: string;
+  askPlaceholder: string;
+  askChips: string[];
+  asking: string;
+  questionsLeft: string; // contains "{n}"
+  limitReached: string;
+  askError: string;
   workLabel: string;
   channelLabel: string;
   signal: string;
@@ -48,6 +55,13 @@ export const strings: Record<Lang, Strings> = {
     metaBasedValue: 'remote / İstanbul',
     metaChannelLabel: 'CHANNEL',
     scrollLabel: 'SCROLL TO EXPLORE',
+    askLabel: '// ask the operator',
+    askPlaceholder: 'Ask anything about my work…',
+    askChips: ['What projects have you built?', "What's your experience?", "What's your tech stack?", 'Are you available for work?'],
+    asking: 'thinking…',
+    questionsLeft: '{n} questions left today',
+    limitReached: "You've reached today's question limit — come back tomorrow.",
+    askError: 'Something went wrong. Please try again.',
     workLabel: '// the work',
     channelLabel: '// open a channel',
     signal: 'send a signal ↗',
@@ -76,6 +90,13 @@ export const strings: Record<Lang, Strings> = {
     metaBasedValue: 'remote / İstanbul',
     metaChannelLabel: 'KANAL',
     scrollLabel: 'AŞAĞI KAYDIR',
+    askLabel: '// operatöre sor',
+    askPlaceholder: 'İşlerim hakkında her şeyi sorabilirsin…',
+    askChips: ['Hangi projeleri yaptın?', 'Tecrüben ne?', 'Hangi teknolojileri kullanıyorsun?', 'İş için müsait misin?'],
+    asking: 'düşünüyor…',
+    questionsLeft: 'bugün {n} soru kaldı',
+    limitReached: 'Bugünkü soru limitine ulaştın — yarın tekrar gel.',
+    askError: 'Bir şeyler ters gitti. Lütfen tekrar dene.',
     workLabel: '// işler',
     channelLabel: '// kanal aç',
     signal: 'sinyal gönder ↗',
