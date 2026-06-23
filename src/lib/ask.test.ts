@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createAskHandler } from './ask';
+import { createAskHandler } from '../pages/api/ask';
 
 function fakeRedis() {
   const store = new Map<string, number>();
