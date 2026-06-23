@@ -1,12 +1,23 @@
 import type { Lang } from '../i18n/strings';
 import { projects, contactEmail } from './projects';
 
-// NOTE: placeholder facts — replace the TODOs with Alp's real details.
 export const knowledge = {
-  bio: 'TODO: a short bio for Alp Senel (independent web developer & designer).',
-  experience: 'TODO: years of experience, roles, notable clients.',
-  skills: ['TODO: list real skills, e.g. Next.js, TypeScript, Shopify, design'],
-  availability: 'TODO: availability for freelance / contract work.',
+  bio: 'Alp Senel is an independent web developer and designer based in İstanbul, working remotely with clients worldwide. With 9 years in frontend development, he builds fast, distinctive e-commerce and brand websites — from complex Shopify storefronts and apps to design systems — pairing solid engineering with a sharp eye for design and detail.',
+  experience:
+    '9 years of frontend development. 8 years at Insider, where he created and maintained the company design system, and team lead for 4 years. 5 years building complex Shopify apps and working with Shopify clients, with extensive knowledge of modern frontend frameworks. Notable clients: Ino Beauty (inobeauty.com.tr), Urban Care (urbancare.com.tr), Stephen Webster (stephenwebster.com), Sterling Home (sterlinghome.co.uk), Wilkinson Sword (wilkinsonsword.com), Bulldog Skincare (bulldogskincare.com), Nobody\'s Child (nobodyschild.com), A Collected Man (acollectedman.com), Volta Motor Büyükçekmece (voltamotorbuyukcekmece.com), and Yaz Evi (yaz-evi.com).',
+  skills: [
+    'Frontend development (9 years)',
+    'Shopify app development',
+    'Shopify theme & storefront development',
+    'Design systems',
+    'Frontend frameworks (React, Next.js, etc.)',
+    'TypeScript',
+    'JavaScript',
+    'HTML & CSS',
+    'UI/UX design',
+    'Team leadership',
+  ],
+  availability: 'Available for select freelance and contract work, remote from İstanbul and comfortable across time zones. Especially interested in e-commerce builds — particularly Shopify — frontend engineering, and design-system work.',
   contactEmail,
 };
 
