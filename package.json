@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "astro": "^4.16.18",
-    "vitest": "^4.1.9"
+    "vitest": "^4.0.4"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
