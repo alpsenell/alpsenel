@@ -20,10 +20,10 @@ export const projects: Project[] = [
     year: '2026',
     url: 'https://www.testerify.com/',
     handle: 'testerify',
-    tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'PostgreSQL'],
+    tech: ['Vue 3', 'Vite', 'Vercel', 'Drizzle ORM', 'Neon Postgres', 'Claude API', 'Shopify App'],
     brief: {
-      en: 'QA and test-management platform. Marketing site plus an app dashboard, built for speed and clarity.',
-      tr: 'QA ve test yönetim platformu. Hız ve sadelik için kurulmuş tanıtım sitesi ve uygulama paneli.',
+      en: 'Alp\'s own SaaS product — an A/B testing platform for Shopify stores. Merchants run storefront experiments through a visual editor, and Testerify tracks impressions, conversions and revenue to call a statistically sound winner. AI-powered test suggestions and insights via the Claude API. Built end to end: native Shopify app plus a standalone Vue web panel.',
+      tr: 'Alp\'ın kendi SaaS ürünü — Shopify mağazaları için bir A/B test platformu. Satıcılar görsel bir editörle vitrin deneyleri kurar; Testerify gösterim, dönüşüm ve geliri izleyerek istatistiksel olarak sağlam bir kazananı belirler. Claude API ile yapay zekâ destekli test önerileri ve içgörüler. Uçtan uca geliştirildi: yerel Shopify uygulaması ve bağımsız bir Vue web paneli.',
     },
   },
   {
@@ -32,10 +32,10 @@ export const projects: Project[] = [
     year: '2025 — today',
     url: 'https://www.yaz-evi.com/',
     handle: 'yaz-evi',
-    tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP'],
+    tech: ['Vue 3', 'TypeScript', 'Tailwind CSS', 'Firebase', 'iyzico', 'Vercel'],
     brief: {
-      en: 'Boutique hotel on Bozcaada, set in a restored historic stone house. An editorial site for the rooms, island experiences and direct booking.',
-      tr: 'Bozcaada\'da, restore edilmiş tarihi bir taş evdeki butik otel. Odalar, ada deneyimleri ve doğrudan rezervasyon için editoryal bir site.',
+      en: 'Boutique hotel on the island of Bozcaada, with five themed rooms named after local myth and history. A bilingual (EN/TR) site with a full direct-booking flow — real-time availability, then secure online payment with Turkish installment plans. Built end to end: Vue 3 front end, Vercel serverless functions, Firebase/Firestore data and iyzico payments, plus a separate staff admin panel.',
+      tr: 'Bozcaada\'da, yerel mit ve tarihten adlar taşıyan beş temalı odalı butik otel. Gerçek zamanlı müsaitlik ve Türk taksit seçenekleriyle güvenli online ödemeye uzanan, uçtan uca doğrudan rezervasyon akışına sahip iki dilli (EN/TR) bir site. Baştan sona geliştirildi: Vue 3 arayüz, Vercel serverless fonksiyonları, Firebase/Firestore veri ve iyzico ödemeleri, ayrı bir personel yönetim paneliyle.',
     },
   },
   {

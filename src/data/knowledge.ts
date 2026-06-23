@@ -18,6 +18,8 @@ export const knowledge = {
     'Team leadership',
   ],
   availability: 'Available for select freelance and contract work, remote from İstanbul and comfortable across time zones. Especially interested in e-commerce builds — particularly Shopify — frontend engineering, and design-system work.',
+  flagshipProject:
+    'Testerify (testerify.com) is Alp\'s own SaaS product, in active development — an A/B testing platform for Shopify stores. Merchants run experiments on their storefront (headlines, layouts, product pages); Testerify assigns visitors to variants, then tracks impressions, conversions and revenue to call a statistically sound winner. It installs as a native Shopify app — embedded admin (App Bridge), a theme app embed and a web pixel — and also ships a standalone web panel. Stack: Vue 3 + Vite (Pinia, Vue Router), serverless API routes on Vercel, Drizzle ORM over Neon Postgres. Notable parts he built: a visual on-page editor for defining variants without code, a statistics engine (two-proportion z-test with Wilson confidence intervals and revenue-per-visitor), revenue attribution via cart attributes, AI-powered test suggestions and insights through the Claude API, plus billing and team/workspace invitations. It shows the kind of work Alp does beyond client sites: shipping a full product end to end, from frontend to backend, payments and data.',
   contactEmail,
 };
 
@@ -39,6 +41,7 @@ export function buildSystemPrompt(lang: Lang): string {
 
   if (isReal(knowledge.bio)) lines.push(`Bio: ${knowledge.bio}`);
   if (isReal(knowledge.experience)) lines.push(`Experience: ${knowledge.experience}`);
+  if (isReal(knowledge.flagshipProject)) lines.push(`Flagship product: ${knowledge.flagshipProject}`);
 
   const realSkills = knowledge.skills.filter(isReal);
   if (realSkills.length > 0) lines.push(`Skills: ${realSkills.join(', ')}`);
