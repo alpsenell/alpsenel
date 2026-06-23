@@ -156,24 +156,20 @@ const clientProjects = projects.map((p) => ({
     </div>
   </div>
 
-  <!-- project "window" modal -->
-  <div id="proj-modal" class="modal" aria-hidden="true">
-    <div class="modal-backdrop" data-close></div>
-    <div class="modal-window" role="dialog" aria-modal="true" aria-labelledby="modal-name">
-      <div class="win-bar">
-        <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-addr" id="modal-addr">anon://</span>
-        <button class="win-close" data-close type="button" aria-label={t.closeLabel}>✕</button>
-      </div>
-      <div class="win-body">
-        <div class="win-meta"><span id="modal-num"></span><span id="modal-year"></span></div>
-        <h2 class="win-name" id="modal-name"></h2>
-        <div class="win-brief-label">{t.briefLabel}</div>
-        <p class="win-brief" id="modal-brief"></p>
-        <div class="win-stack-label">{t.stackLabel}</div>
-        <div class="win-stack" id="modal-stack"></div>
-        <a class="win-open" id="modal-open" href="#" target="_blank" rel="noopener">{t.openLive}</a>
-      </div>
+  <!-- project "window" — full-page animated takeover -->
+  <div id="proj-window" class="fullwin" role="dialog" aria-modal="true" aria-labelledby="fw-name" aria-hidden="true">
+    <div class="fw-bar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="fw-addr" id="fw-addr">anon://</span>
+      <button class="fw-close" data-close type="button" aria-label={t.closeLabel}>{t.closeLabel} ✕</button>
+    </div>
+    <div class="fw-inner">
+      <div class="fw-meta"><span id="fw-num"></span><span id="fw-year"></span></div>
+      <h2 class="fw-name" id="fw-name"></h2>
+      <p class="fw-brief" id="fw-brief"></p>
+      <div class="fw-stack-label">{t.stackLabel}</div>
+      <div class="fw-stack" id="fw-stack"></div>
+      <a class="fw-open" id="fw-open" href="#" target="_blank" rel="noopener">{t.openLive}</a>
     </div>
   </div>
 
@@ -196,24 +192,24 @@ const clientProjects = projects.map((p) => ({
         syncLabel();
       });
 
-      // ---- project "window" modal ----
+      // ---- project "window" — full-page animated takeover ----
       (function () {
-        const modal = document.getElementById('proj-modal');
+        const win = document.getElementById('proj-window');
         const dataEl = document.getElementById('projects-data');
-        if (!modal || !dataEl) return;
+        if (!win || !dataEl) return;
         let data = [];
         try { data = JSON.parse(dataEl.textContent); } catch (e) { return; }
 
-        const elNum = document.getElementById('modal-num');
-        const elYear = document.getElementById('modal-year');
-        const elName = document.getElementById('modal-name');
-        const elAddr = document.getElementById('modal-addr');
-        const elBrief = document.getElementById('modal-brief');
-        const elStack = document.getElementById('modal-stack');
-        const elOpen = document.getElementById('modal-open');
+        const elNum = document.getElementById('fw-num');
+        const elYear = document.getElementById('fw-year');
+        const elName = document.getElementById('fw-name');
+        const elAddr = document.getElementById('fw-addr');
+        const elBrief = document.getElementById('fw-brief');
+        const elStack = document.getElementById('fw-stack');
+        const elOpen = document.getElementById('fw-open');
         let lastFocus = null;
 
-        function open(idx) {
+        function open(idx, originY) {
           const p = data[idx];
           if (!p) return;
           elNum.textContent = p.num;
@@ -225,19 +221,24 @@ const clientProjects = projects.map((p) => ({
           elStack.innerHTML = '';
           p.tech.forEach(function (techName) {
             const chip = document.createElement('span');
-            chip.className = 'win-chip';
+            chip.className = 'fw-chip';
             chip.textContent = techName;
             elStack.appendChild(chip);
           });
-          lastFocus = document.activeElement;
-          modal.classList.add('open');
-          modal.setAttribute('aria-hidden', 'false');
+          // grow the panel open from the clicked row's vertical position
+          const oy = Math.max(0, Math.min(100, (originY / window.innerHeight) * 100));
+          win.style.setProperty('--oy', oy.toFixed(2) + '%');
+          win.scrollTop = 0;
+          win.setAttribute('aria-hidden', 'false');
           document.body.style.overflow = 'hidden';
-          elOpen.focus();
+          lastFocus = document.activeElement;
+          win.getBoundingClientRect(); // flush styles so the transition runs
+          requestAnimationFrame(function () { win.classList.add('open'); });
+          setTimeout(function () { elOpen.focus(); }, 80);
         }
         function close() {
-          modal.classList.remove('open');
-          modal.setAttribute('aria-hidden', 'true');
+          win.classList.remove('open');
+          win.setAttribute('aria-hidden', 'true');
           document.body.style.overflow = '';
           if (lastFocus && lastFocus.focus) lastFocus.focus();
         }
@@ -247,14 +248,15 @@ const clientProjects = projects.map((p) => ({
             // let modified clicks (new tab / middle) fall through to the real link
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
             e.preventDefault();
-            open(parseInt(el.getAttribute('data-index'), 10));
+            const rect = el.getBoundingClientRect();
+            open(parseInt(el.getAttribute('data-index'), 10), rect.top + rect.height / 2);
           });
         });
-        modal.querySelectorAll('[data-close]').forEach(function (el) {
+        win.querySelectorAll('[data-close]').forEach(function (el) {
           el.addEventListener('click', close);
         });
         document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && modal.classList.contains('open')) close();
+          if (e.key === 'Escape' && win.classList.contains('open')) close();
         });
       })();
 
@@ -485,33 +487,41 @@ const clientProjects = projects.map((p) => ({
 
     footer.site { border-top: 1px solid var(--line); max-width: 1300px; margin: 0 auto; padding: 24px clamp(20px, 4vw, 44px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); }
 
-    /* project "window" modal */
-    .modal { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center; padding: 24px; }
-    .modal.open { display: flex; }
-    .modal-backdrop { position: absolute; inset: 0; background: color-mix(in oklab, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); opacity: 0; transition: opacity .35s ease; }
-    .modal.open .modal-backdrop { opacity: 1; }
-    .modal-window { position: relative; width: min(580px, 94vw); max-height: 88vh; overflow: auto; background: var(--bg2); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 40px 90px rgba(0,0,0,.55); transform: scale(.9) translateY(14px); opacity: 0; transition: transform .42s cubic-bezier(.2,.9,.25,1), opacity .3s ease; }
-    .modal.open .modal-window { transform: none; opacity: 1; }
-    .win-bar { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; }
-    .win-dots { display: flex; gap: 7px; }
-    .win-dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); display: inline-block; }
-    .win-dots i:first-child { background: var(--accent); }
-    .win-addr { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); letter-spacing: 0.04em; }
-    .win-close { margin-left: auto; background: none; border: none; color: var(--fg3); cursor: pointer; font-size: 14px; line-height: 1; font-family: 'JetBrains Mono', monospace; transition: color .2s ease; }
-    .win-close:hover { color: var(--fg); }
-    .win-body { padding: 30px clamp(22px, 4vw, 36px) 36px; }
-    .win-meta { display: flex; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg3); letter-spacing: 0.06em; }
-    .win-name { font-weight: 600; font-size: clamp(30px, 6vw, 54px); letter-spacing: -0.03em; line-height: 1; margin-top: 10px; color: var(--fg); }
-    .win-brief-label, .win-stack-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--fg3); }
-    .win-brief-label { margin-top: 26px; }
-    .win-brief { margin-top: 12px; color: var(--fg2); font-size: clamp(14px, 1.6vw, 16px); line-height: 1.62; max-width: 48ch; }
-    .win-stack-label { margin-top: 28px; }
-    .win-stack { margin-top: 13px; display: flex; flex-wrap: wrap; gap: 9px; }
-    .win-chip { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg2); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; }
-    .win-open { margin-top: 32px; display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.04em; color: var(--ink); background: var(--accent); text-decoration: none; padding: 13px 22px; border-radius: 9px; font-weight: 500; transition: filter .2s ease; }
-    .win-open:hover { filter: brightness(1.08); }
+    /* project "window" — full-page animated takeover */
+    .fullwin { position: fixed; inset: 0; z-index: 90; background: var(--bg); color: var(--fg); overflow-y: auto;
+      visibility: hidden; opacity: 0;
+      clip-path: inset(var(--oy, 50%) 0 calc(100% - var(--oy, 50%)) 0);
+      transition: clip-path .62s cubic-bezier(.76, 0, .24, 1), opacity .25s ease .28s, visibility 0s linear .62s; }
+    .fullwin.open { visibility: visible; opacity: 1; clip-path: inset(0 0 0 0);
+      transition: clip-path .62s cubic-bezier(.76, 0, .24, 1), opacity .2s ease, visibility 0s; }
+    .fw-bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 22px clamp(20px, 4vw, 44px); border-bottom: 1px solid var(--line); background: color-mix(in oklab, var(--bg) 84%, transparent); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
+    .fw-bar .win-dots { display: flex; gap: 7px; }
+    .fw-bar .win-dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); display: inline-block; }
+    .fw-bar .win-dots i:first-child { background: var(--accent); }
+    .fw-addr { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg3); letter-spacing: 0.04em; }
+    .fw-close { margin-left: auto; display: flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; color: var(--fg2); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.06em; transition: color .2s ease; }
+    .fw-close:hover { color: var(--accent); }
+    .fw-inner { max-width: 1100px; margin: 0 auto; padding: clamp(48px, 12vh, 150px) clamp(20px, 4vw, 44px) 110px; }
+    .fw-meta { display: flex; gap: 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg3); letter-spacing: 0.08em; }
+    .fw-name { font-weight: 700; font-size: clamp(46px, 11vw, 140px); line-height: 0.95; letter-spacing: -0.04em; margin-top: 18px; color: var(--fg); }
+    .fw-brief { margin-top: 34px; color: var(--fg2); font-size: clamp(16px, 2.2vw, 24px); line-height: 1.5; max-width: 60ch; }
+    .fw-stack-label { margin-top: 54px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: var(--fg3); }
+    .fw-stack { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .fw-chip { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; }
+    .fw-open { margin-top: 54px; display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: 0.04em; color: var(--ink); background: var(--accent); text-decoration: none; padding: 16px 28px; border-radius: 10px; font-weight: 500; transition: filter .2s ease; }
+    .fw-open:hover { filter: brightness(1.08); }
+    /* staggered content reveal once the panel has opened */
+    .fullwin .fw-inner > * { opacity: 0; transform: translateY(26px); transition: opacity .55s ease, transform .55s cubic-bezier(.2, .9, .25, 1); }
+    .fullwin.open .fw-inner > * { opacity: 1; transform: none; }
+    .fullwin.open .fw-inner > *:nth-child(1) { transition-delay: .30s; }
+    .fullwin.open .fw-inner > *:nth-child(2) { transition-delay: .36s; }
+    .fullwin.open .fw-inner > *:nth-child(3) { transition-delay: .42s; }
+    .fullwin.open .fw-inner > *:nth-child(4) { transition-delay: .48s; }
+    .fullwin.open .fw-inner > *:nth-child(5) { transition-delay: .54s; }
+    .fullwin.open .fw-inner > *:nth-child(6) { transition-delay: .60s; }
     @media (prefers-reduced-motion: reduce) {
-      .modal-window { transition: opacity .2s ease; transform: none; }
+      .fullwin, .fullwin.open { clip-path: none; transition: opacity .2s ease, visibility 0s; }
+      .fullwin .fw-inner > * { transition: none; transform: none; opacity: 1; }
     }
   </style>
 </body>
