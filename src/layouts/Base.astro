@@ -31,6 +31,13 @@ const jsonLd = {
       url: site,
       jobTitle: lang === 'tr' ? 'Web Geliştirici & Tasarımcı' : 'Web Developer & Designer',
       knowsAbout: ['Web Development', 'Web Design', 'E-commerce', 'Shopify', 'Frontend Engineering'],
+      // sameAs ties this site to the same real-world person across the web —
+      // the strongest signal for ranking on the name "Alp Senel".
+      sameAs: [
+        'https://www.linkedin.com/in/alpsenel',
+        'https://github.com/alpsenell',
+        'https://www.instagram.com/alpsenel/',
+      ],
     },
     {
       '@type': 'WebSite',
@@ -100,6 +107,14 @@ const clientProjects = projects.map((p) => ({
   />
 
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <!-- Testerify -->
+  <script
+    is:inline
+    src="https://panel.testerify.com/testerify.js"
+    data-tfy-key="0002456bd0a99b4e2ef2a6d37ff5dd537499ba1f81b83d415fb4654e87e6231d"
+    defer
+  ></script>
 </head>
 <body>
   <div class="screen">
@@ -123,6 +138,10 @@ const clientProjects = projects.map((p) => ({
       <section class="hero">
         <div class="hero-row">
           <div class="hero-head">
+            <!-- Real page heading for search engines & screen readers.
+                 Visually hidden (accessible pattern, not display:none) so the
+                 hero's visual focus stays on the "ask" prompt. -->
+            <h1 class="visually-hidden">{t.title}</h1>
             <AskHero lang={lang} />
           </div>
           <aside class="hero-meta">
@@ -503,6 +522,9 @@ const clientProjects = projects.map((p) => ({
   <style is:global>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+    /* Accessible "visually hidden": kept in the accessibility tree and read by
+       search engines, but off-screen for sighted users. NOT display:none. */
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     :root {
       --bg: oklch(0.155 0.012 256); --bg2: oklch(0.205 0.013 256);
       --line: oklch(0.30 0.012 256); --fg: oklch(0.965 0.004 256); --fg2: oklch(0.66 0.012 256); --fg3: oklch(0.46 0.012 256);
