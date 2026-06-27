@@ -146,6 +146,18 @@ export const projects: Project[] = [
       tr: 'Nadir, ikinci el ve bağımsız mekanik saatler için pazar yeri. Derin marka hikâyeleri ve rafine bir satın alma akışıyla küratöryel, editoryal bir Shopify vitrini.',
     },
   },
+  {
+    num: '12',
+    name: 'LYMA',
+    year: '2024 — today',
+    url: 'https://lyma.life/',
+    handle: 'lyma',
+    tech: ['Shopify Plus', 'Liquid', 'Preact', 'TypeScript', 'Vite'],
+    brief: {
+      en: 'Science-led longevity and skincare brand, known for its FDA-cleared at-home laser, clinically-dosed supplement and two-step skincare system. A premium, editorial Shopify Plus storefront built on a custom Preact + Storefront API theme framework.',
+      tr: 'FDA onaylı evde kullanılan lazeri, klinik dozajlı takviyesi ve iki adımlı cilt bakım sistemiyle tanınan, bilim odaklı uzun yaşam ve cilt bakımı markası. Özel bir Preact + Storefront API tema altyapısı üzerine kurulu, premium ve editoryal bir Shopify Plus vitrini.',
+    },
+  },
 ];
 
 export const contactEmail = 'anon@operator.dev';
