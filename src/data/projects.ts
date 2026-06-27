@@ -160,4 +160,4 @@ export const projects: Project[] = [
   },
 ];
 
-export const contactEmail = 'anon@operator.dev';
+export const contactEmail = 'alp@testerify.com';
