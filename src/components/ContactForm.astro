@@ -1,0 +1,139 @@
+---
+import type { Lang } from '../i18n/strings';
+import { strings } from '../i18n/strings';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = strings[lang];
+---
+<form class="cf" data-contact data-lang={lang} novalidate>
+  <div class="cf-row">
+    <div class="cf-field">
+      <label class="cf-label" for="cf-name">{t.contactNameLabel}</label>
+      <input class="cf-input" id="cf-name" name="name" type="text" maxlength="80" autocomplete="name"
+        placeholder={t.contactNamePlaceholder} required data-cf-name />
+    </div>
+    <div class="cf-field">
+      <label class="cf-label" for="cf-email">{t.contactEmailLabel}</label>
+      <input class="cf-input" id="cf-email" name="email" type="email" maxlength="254" autocomplete="email"
+        placeholder={t.contactEmailPlaceholder} required data-cf-email />
+    </div>
+  </div>
+  <div class="cf-field">
+    <label class="cf-label" for="cf-message">{t.contactMessageLabel}</label>
+    <textarea class="cf-input cf-textarea" id="cf-message" name="message" maxlength="3000" rows="4"
+      placeholder={t.contactMessagePlaceholder} required data-cf-message></textarea>
+  </div>
+
+  <!-- honeypot: hidden from people, irresistible to bots. Filled => dropped. -->
+  <div class="cf-trap" aria-hidden="true">
+    <label for="cf-company">Company</label>
+    <input id="cf-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="cf-actions">
+    <button class="cf-send" type="submit" data-cursor data-cf-submit>{t.contactSend}</button>
+    <span class="cf-status" data-cf-status aria-live="polite"></span>
+  </div>
+</form>
+
+<script
+  is:inline
+  define:vars={{ sending: t.contactSending, netError: t.contactError, lang }}
+>
+  (function () {
+    const form = document.querySelector('[data-contact]');
+    if (!form) return;
+    const nameEl = form.querySelector('[data-cf-name]');
+    const emailEl = form.querySelector('[data-cf-email]');
+    const msgEl = form.querySelector('[data-cf-message]');
+    const trapEl = form.querySelector('#cf-company');
+    const btn = form.querySelector('[data-cf-submit]');
+    const status = form.querySelector('[data-cf-status]');
+    let busy = false;
+    let done = false;
+
+    function setStatus(text, kind) {
+      status.textContent = text || '';
+      status.dataset.kind = kind || '';
+    }
+
+    // Light client-side gate for instant feedback — the server re-validates.
+    function clientValid() {
+      if (!nameEl.value.trim()) return false;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) return false;
+      if (msgEl.value.trim().length < 10) return false;
+      return true;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (busy || done) return;
+      if (!clientValid()) {
+        // Let the browser highlight the specific field that's wrong.
+        form.reportValidity();
+        return;
+      }
+
+      busy = true;
+      btn.disabled = true;
+      setStatus(sending, '');
+
+      let res;
+      try {
+        res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            name: nameEl.value.trim(),
+            email: emailEl.value.trim(),
+            message: msgEl.value.trim(),
+            company: trapEl ? trapEl.value : '',
+            lang: lang,
+          }),
+        });
+      } catch (err) {
+        setStatus(netError, 'err');
+        busy = false; btn.disabled = false;
+        return;
+      }
+
+      const data = await res.json().catch(function () { return {}; });
+      busy = false;
+
+      if (res.ok) {
+        done = true;
+        setStatus(data.message || '', 'ok');
+        nameEl.disabled = emailEl.disabled = msgEl.disabled = btn.disabled = true;
+        return;
+      }
+
+      // Validation / rate-limit / send errors all carry a localized message.
+      setStatus(data.message || netError, 'err');
+      btn.disabled = false;
+    });
+  })();
+</script>
+
+<style>
+  .cf { margin-top: 40px; max-width: 680px; }
+  .cf-row { display: flex; gap: 26px; }
+  .cf-field { flex: 1; min-width: 0; margin-bottom: 26px; }
+  .cf-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--fg3); margin-bottom: 10px; }
+  .cf-input { width: 100%; background: none; border: none; border-bottom: 1px solid var(--line); outline: none; color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-size: 17px; padding: 8px 0; transition: border-color .25s ease; caret-color: var(--accent); }
+  .cf-input::placeholder { color: var(--fg3); }
+  .cf-input:focus { border-bottom-color: var(--accent); }
+  .cf-input:disabled { opacity: 0.5; }
+  .cf-textarea { resize: vertical; min-height: 96px; line-height: 1.5; }
+  /* honeypot — kept in the layout flow for bots but off-screen for people */
+  .cf-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .cf-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 8px; }
+  .cf-send { font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.04em; color: var(--ink); background: var(--accent); border: none; border-radius: 10px; padding: 14px 24px; cursor: pointer; font-weight: 500; transition: filter .2s ease, opacity .2s ease; }
+  .cf-send:hover { filter: brightness(1.08); }
+  .cf-send:disabled { cursor: default; opacity: 0.55; filter: none; }
+  .cf-status { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--fg3); }
+  .cf-status[data-kind="ok"] { color: var(--accent); }
+  .cf-status[data-kind="err"] { color: var(--fg2); }
+  @media (max-width: 560px) {
+    .cf-row { flex-direction: column; gap: 0; }
+  }
+</style>

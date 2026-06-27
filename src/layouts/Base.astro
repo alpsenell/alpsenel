@@ -3,6 +3,7 @@ import type { Lang } from '../i18n/strings';
 import { strings } from '../i18n/strings';
 import { loadKnowledge } from '../lib/knowledgeStore';
 import AskHero from '../components/AskHero.astro';
+import ContactForm from '../components/ContactForm.astro';
 
 interface Props {
   lang: Lang;
@@ -184,6 +185,7 @@ const clientProjects = projects.map((p) => ({
       <section class="channel">
         <div class="label">{t.channelLabel}</div>
         <a data-cursor class="signal" href={`mailto:${contactEmail}`}>{t.signal}</a>
+        <ContactForm lang={lang} />
         <div class="signed">
           <span class="lbl">{t.signed}</span>
           <span class="cipher" id="cipher">█▓█▓██▓█▓</span>
