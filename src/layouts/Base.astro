@@ -1,7 +1,7 @@
 ---
 import type { Lang } from '../i18n/strings';
 import { strings } from '../i18n/strings';
-import { projects, contactEmail } from '../data/projects';
+import { loadKnowledge } from '../lib/knowledgeStore';
 import AskHero from '../components/AskHero.astro';
 
 interface Props {
@@ -12,6 +12,11 @@ interface Props {
 
 const { lang, path } = Astro.props;
 const t = strings[lang];
+
+// Real-time: projects + contact come from the Neon store (falls back to the
+// static defaults if the DB is unset/unreachable). Requires this page to be
+// server-rendered — see `export const prerender = false` in the route files.
+const { projects, contactEmail } = await loadKnowledge();
 
 const site = 'https://alpsenel.com';
 const canonical = new URL(path, site).href;

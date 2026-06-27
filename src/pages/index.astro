@@ -1,5 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
+
+// Server-rendered so the project list reflects the Neon store in real time.
+export const prerender = false;
 ---
 
 <Base lang="en" path="/" />

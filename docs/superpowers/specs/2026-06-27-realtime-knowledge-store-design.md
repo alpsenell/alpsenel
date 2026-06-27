@@ -30,14 +30,23 @@ Make the assistant's knowledge **real-time, hybrid**:
    a fresh, dated "live note" pulled from the actual project site — without
    touching the hand-written copy.
 
-## Non-goals
+## Update 2026-06-27 — scope expanded to the homepage
 
-- **The visible homepage stays static.** Scope is the **AI assistant
-  (`/api/ask`) only**. `index.astro` / `tr/index.astro` remain prerendered and
-  keep rendering the project list + detail "window" from the static
-  `src/data/projects.ts` at build time. Showing a new/edited project *on the
-  page* still requires a redeploy. (SSR / ISR of the homepage was considered and
-  explicitly declined for simplicity.)
+The "AI-only" scope below was **reverted shortly after shipping**: the visible
+homepage is now real-time too. `index.astro` / `tr/index.astro` set
+`export const prerender = false` and `Base.astro` reads `await loadKnowledge()`
+instead of importing the static `projects`. So the project list + detail
+"window" now reflect the Neon store at request time (same ~60s cache + static
+fallback). Net effect: editing a project in the DB updates **both** the page and
+the assistant with no redeploy; the static files are now purely seed + fallback.
+The "Two sources / accepted drift" section is therefore obsolete — there is one
+runtime source (Neon) for both surfaces again.
+
+## Non-goals (original — see Update above)
+
+- ~~**The visible homepage stays static.** Scope is the **AI assistant
+  (`/api/ask`) only**.~~ Superseded: the homepage is now server-rendered from the
+  same store (see Update above).
 - No live site-fetching in the `/ask` hot path (too slow/costly; storefronts
   have no clean structured data).
 - No admin UI in v1 — editing is via Drizzle Studio / SQL.
