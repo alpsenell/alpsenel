@@ -8,6 +8,7 @@ const site = {
   availability: 'A',
   flagshipProject: 'F',
   contactEmail: 'c@d.e',
+  facts: 'FREEFORM-FACTS',
 };
 
 const alpha = {
@@ -40,6 +41,7 @@ describe('rowsToKnowledge', () => {
     expect(k.bio).toBe('B');
     expect(k.skills).toEqual(['s1', 's2']);
     expect(k.contactEmail).toBe('c@d.e');
+    expect(k.facts).toBe('FREEFORM-FACTS');
     expect(k.projects).toEqual([]);
   });
 

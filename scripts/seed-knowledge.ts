@@ -24,9 +24,12 @@ async function main() {
       availability: k.availability,
       flagshipProject: k.flagshipProject,
       contactEmail: k.contactEmail,
+      facts: k.facts,
     })
     .onConflictDoUpdate({
       target: siteKnowledge.id,
+      // `facts` is intentionally omitted here: it's seeded once on first insert,
+      // then owned by whatever you edit in the DB — a re-seed never clobbers it.
       set: {
         bio: k.bio,
         experience: k.experience,

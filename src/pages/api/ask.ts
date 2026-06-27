@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Redis } from '@upstash/redis';
 import { validateQuestion, type Lang } from '../../lib/validate';
 import { checkRateLimit, getClientIp, type KvLike } from '../../lib/rateLimit';
-import { buildSystemPrompt, type KnowledgeData } from '../../data/knowledge';
+import { buildSystemPrompt, todayISO, type KnowledgeData } from '../../data/knowledge';
 import { loadKnowledge } from '../../lib/knowledgeStore';
 
 export const prerender = false;
@@ -55,7 +55,7 @@ export function createAskHandler(deps: Deps) {
       stream = await deps.getAnthropic().messages.create({
         model: 'claude-haiku-4-5',
         max_tokens: 400,
-        system: [{ type: 'text', text: buildSystemPrompt(v.lang, knowledge), cache_control: { type: 'ephemeral' } }],
+        system: [{ type: 'text', text: buildSystemPrompt(v.lang, knowledge, todayISO()), cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: v.question }],
         stream: true,
       });

@@ -11,6 +11,7 @@ interface SiteRow {
   availability: string;
   flagshipProject: string;
   contactEmail: string;
+  facts: string;
 }
 interface ProjectRow {
   sortOrder: number;
@@ -49,6 +50,7 @@ export function rowsToKnowledge(site: SiteRow, rows: ProjectRow[]): KnowledgeDat
     availability: site.availability,
     flagshipProject: site.flagshipProject,
     contactEmail: site.contactEmail,
+    facts: site.facts,
     projects,
   };
 }

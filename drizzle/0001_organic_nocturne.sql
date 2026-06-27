@@ -1,0 +1,1 @@
+ALTER TABLE "site_knowledge" ADD COLUMN "facts" text DEFAULT '' NOT NULL;

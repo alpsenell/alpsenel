@@ -9,6 +9,7 @@ export const siteKnowledge = pgTable('site_knowledge', {
   availability: text('availability').notNull(),
   flagshipProject: text('flagship_project').notNull(),
   contactEmail: text('contact_email').notNull(),
+  facts: text('facts').notNull().default(''),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
