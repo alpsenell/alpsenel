@@ -3,7 +3,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Redis } from '@upstash/redis';
 import { validateQuestion, type Lang } from '../../lib/validate';
 import { checkRateLimit, getClientIp, type KvLike } from '../../lib/rateLimit';
-import { buildSystemPrompt } from '../../data/knowledge';
+import { buildSystemPrompt, type KnowledgeData } from '../../data/knowledge';
+import { loadKnowledge } from '../../lib/knowledgeStore';
 
 export const prerender = false;
 
@@ -27,6 +28,7 @@ function json(status: number, data: unknown): Response {
 interface Deps {
   getRedis: () => KvLike;
   getAnthropic: () => { messages: { create: (args: any) => Promise<AsyncIterable<any>> } };
+  getKnowledge: () => Promise<KnowledgeData>;
 }
 
 export function createAskHandler(deps: Deps) {
@@ -46,12 +48,14 @@ export function createAskHandler(deps: Deps) {
     }
     if (!rl.allowed) return json(429, { error: 'rate_limited', message: MSG[v.lang].limit, remaining: 0 });
 
+    const knowledge = await deps.getKnowledge();
+
     let stream: AsyncIterable<any>;
     try {
       stream = await deps.getAnthropic().messages.create({
         model: 'claude-haiku-4-5',
         max_tokens: 400,
-        system: [{ type: 'text', text: buildSystemPrompt(v.lang), cache_control: { type: 'ephemeral' } }],
+        system: [{ type: 'text', text: buildSystemPrompt(v.lang, knowledge), cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: v.question }],
         stream: true,
       });
@@ -89,6 +93,7 @@ export function createAskHandler(deps: Deps) {
 const handler = createAskHandler({
   getRedis: () => Redis.fromEnv() as unknown as KvLike,
   getAnthropic: () => new Anthropic({ timeout: 20000, maxRetries: 1 }) as any,
+  getKnowledge: () => loadKnowledge(),
 });
 
 export const POST: APIRoute = ({ request }) => handler(request);

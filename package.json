@@ -13,18 +13,26 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "node --env-file=.env --import tsx scripts/seed-knowledge.ts"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@types/node": "^26.0.0",
     "astro": "^4.16.18",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "vitest": "^4.0.4"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
     "@astrojs/vercel": "^7.8.2",
-    "@upstash/redis": "^1.38.0"
+    "@neondatabase/serverless": "^1.1.0",
+    "@upstash/redis": "^1.38.0",
+    "drizzle-orm": "^0.45.2"
   }
 }
