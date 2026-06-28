@@ -289,6 +289,8 @@ const clientProjects = projects.map((p) => ({
           elAddr.textContent = 'anon://' + p.handle;
           elBrief.textContent = p.brief;
           elOpen.href = p.url;
+          // Make the "open live" event unique per project (modal is reused).
+          elOpen.setAttribute('data-tfy-event', 'project_open_live_' + p.handle);
           elStack.innerHTML = '';
           p.tech.forEach(function (techName) {
             const chip = document.createElement('span');
