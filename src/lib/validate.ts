@@ -26,8 +26,12 @@ export function validateQuestion(body: unknown): ValidateResult {
 export const CONTACT_LIMITS = {
   name: { min: 1, max: 80 },
   email: { max: 254 }, // RFC 5321 max length
-  message: { min: 10, max: 3000 },
+  // `min` counts non-whitespace characters only — 15 real characters, spaces excluded.
+  message: { min: 15, max: 3000 },
 } as const;
+
+// Characters that count toward the message minimum (everything but whitespace).
+const countMessageChars = (s: string): number => s.replace(/\s/g, '').length;
 
 // Pragmatic single-line email check — not RFC-exhaustive, but rejects the
 // obvious junk while accepting anything a real person would type.
@@ -73,7 +77,7 @@ export function validateContact(body: unknown): ValidateContactResult {
   }
 
   const m = message.trim();
-  if (m.length < CONTACT_LIMITS.message.min || m.length > CONTACT_LIMITS.message.max) {
+  if (countMessageChars(m) < CONTACT_LIMITS.message.min || m.length > CONTACT_LIMITS.message.max) {
     return { ok: false, lang: l, reason: 'message' };
   }
 

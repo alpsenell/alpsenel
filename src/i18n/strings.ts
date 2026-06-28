@@ -36,6 +36,9 @@ export interface Strings {
   contactSend: string;
   contactSending: string;
   contactError: string;
+  /** Inline field-validation messages, surfaced before the request is sent. */
+  contactEmailError: string;
+  contactMessageError: string;
   signed: string;
   footLeft: string;
   footRight: string;
@@ -81,9 +84,11 @@ export const strings: Record<Lang, Strings> = {
     contactEmailPlaceholder: 'you@example.com',
     contactMessageLabel: 'MESSAGE',
     contactMessagePlaceholder: 'Tell me about your project…',
-    contactSend: 'send message ↗',
+    contactSend: 'send a signal ↗',
     contactSending: 'sending…',
     contactError: 'Something went wrong. Please try again.',
+    contactEmailError: 'Please enter a valid email address.',
+    contactMessageError: 'Please write a message of at least 15 characters.',
     signed: 'signed',
     footLeft: '© 2026 — Alp Senel',
     footRight: 'built by Alp Senel',
@@ -125,9 +130,11 @@ export const strings: Record<Lang, Strings> = {
     contactEmailPlaceholder: 'sen@ornek.com',
     contactMessageLabel: 'MESAJ',
     contactMessagePlaceholder: 'Projenden bahset…',
-    contactSend: 'mesaj gönder ↗',
+    contactSend: 'sinyal gönder ↗',
     contactSending: 'gönderiliyor…',
     contactError: 'Bir şeyler ters gitti. Lütfen tekrar dene.',
+    contactEmailError: 'Lütfen geçerli bir e-posta adresi yaz.',
+    contactMessageError: 'Lütfen en az 15 karakterlik bir mesaj yaz.',
     signed: 'imzalı',
     footLeft: '© 2026 — Alp Senel',
     footRight: 'Alp Senel tarafından yapıldı',

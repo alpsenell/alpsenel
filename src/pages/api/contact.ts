@@ -25,7 +25,7 @@ const MSG: Record<Lang, Copy> = {
     invalid: {
       name: 'Please enter your name.',
       email: 'Please enter a valid email address.',
-      message: 'Please write a message of at least 10 characters.',
+      message: 'Please write a message of at least 15 characters.',
       bad: 'Please check the form and try again.',
     },
     limit: "You've sent a few messages already — please try again tomorrow.",
@@ -37,7 +37,7 @@ const MSG: Record<Lang, Copy> = {
     invalid: {
       name: 'Lütfen adını yaz.',
       email: 'Lütfen geçerli bir e-posta adresi yaz.',
-      message: 'Lütfen en az 10 karakterlik bir mesaj yaz.',
+      message: 'Lütfen en az 15 karakterlik bir mesaj yaz.',
       bad: 'Lütfen formu kontrol edip tekrar dene.',
     },
     limit: 'Zaten birkaç mesaj gönderdin — lütfen yarın tekrar dene.',

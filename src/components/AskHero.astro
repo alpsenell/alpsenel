@@ -21,7 +21,7 @@ const t = strings[lang];
   </form>
   <div class="ask-chips" data-ask-chips>
     {t.askChips.map((c) => (
-      <button class="ask-chip" type="button" data-cursor data-chip={c}>{c}</button>
+      <button class="ask-chip" type="button" data-cursor data-tfy-event="ask_chip" data-chip={c}>{c}</button>
     ))}
   </div>
   <div class="ask-answer" data-ask-answer hidden></div>
@@ -46,6 +46,8 @@ const t = strings[lang];
 
     async function ask(question) {
       if (busy || locked || !question.trim()) return;
+      // Fires for every real ask — typed + Enter, the send button, or a chip.
+      if (window.tfyEvent) window.tfyEvent('ask_submit');
       busy = true;
       input.value = question;
       input.disabled = true;

@@ -121,6 +121,34 @@ const clientProjects = projects.map((p) => ({
     data-tfy-key="0002456bd0a99b4e2ef2a6d37ff5dd537499ba1f81b83d415fb4654e87e6231d"
     defer
   ></script>
+
+  <!-- Testerify custom-event tracking. One global helper + delegated click
+       listener: any element carrying `data-tfy-event` fires that event. The
+       two forms call window.tfyEvent() from their own handlers so keyboard
+       submits are counted too. Defined here so it exists before any inline
+       component script runs; the Testerify SDK above loads `defer`, so the
+       guard tolerates clicks that land before the SDK is ready. -->
+  <script is:inline>
+    window.tfyEvent = function (name) {
+      if (!name) return;
+      try {
+        var t = window.testerify;
+        if (t && typeof t.customEvent === 'function') t.customEvent(name);
+      } catch (e) {
+        /* analytics must never break the page */
+      }
+    };
+    document.addEventListener(
+      'click',
+      function (e) {
+        var node = e.target;
+        if (!(node instanceof Element)) return;
+        var el = node.closest('[data-tfy-event]');
+        if (el) window.tfyEvent(el.getAttribute('data-tfy-event'));
+      },
+      true
+    );
+  </script>
 </head>
 <body>
   <div class="screen">
@@ -133,8 +161,8 @@ const clientProjects = projects.map((p) => ({
       <header class="topbar">
         <span class="brand">{t.brand}</span>
         <div class="topbar-actions">
-          <a class="lang" data-cursor href={t.otherLangHref} hreflang={lang === 'en' ? 'tr' : 'en'} aria-label="Change language">{t.otherLangLabel}</a>
-          <button data-cursor id="themeToggle" aria-label="Toggle theme">
+          <a class="lang" data-cursor data-tfy-event="lang_toggle" href={t.otherLangHref} hreflang={lang === 'en' ? 'tr' : 'en'} aria-label="Change language">{t.otherLangLabel}</a>
+          <button data-cursor data-tfy-event="theme_toggle" id="themeToggle" aria-label="Toggle theme">
             <span class="dot"></span><span id="themeLabel">{t.lightsOn}</span>
           </button>
         </div>
@@ -157,11 +185,11 @@ const clientProjects = projects.map((p) => ({
             </div>
             <div>
               <div class="meta-label">{t.metaChannelLabel}</div>
-              <a class="meta-link" data-cursor href={`mailto:${contactEmail}`}>{t.signal}</a>
+              <a class="meta-link" data-cursor data-tfy-event="contact_mailto" href={`mailto:${contactEmail}`}>{t.signal}</a>
             </div>
           </aside>
         </div>
-        <a class="scroll-explore" data-cursor href="#work">
+        <a class="scroll-explore" data-cursor data-tfy-event="scroll_to_work" href="#work">
           {t.scrollLabel}
           <span class="chevrons"><span></span><span></span><span></span></span>
         </a>
@@ -171,7 +199,7 @@ const clientProjects = projects.map((p) => ({
       <section id="work" class="index">
         <div class="label">{t.workLabel}</div>
         {projects.map((p, i) => (
-          <a class="entry" href={p.url} target="_blank" rel="noopener" data-cursor data-reveal data-index={i}>
+          <a class="entry" href={p.url} target="_blank" rel="noopener" data-cursor data-reveal data-index={i} data-tfy-event={`project_open_${p.handle}`}>
             <span class="left">
               <span class="num">{p.num}</span>
               <span class="name">{p.name}</span>
@@ -184,7 +212,6 @@ const clientProjects = projects.map((p) => ({
       <!-- CHANNEL -->
       <section class="channel">
         <div class="label">{t.channelLabel}</div>
-        <a data-cursor class="signal" href={`mailto:${contactEmail}`}>{t.signal}</a>
         <ContactForm lang={lang} />
         <div class="signed">
           <span class="lbl">{t.signed}</span>
@@ -205,7 +232,7 @@ const clientProjects = projects.map((p) => ({
     <div class="fw-bar">
       <span class="win-dots"><i></i><i></i><i></i></span>
       <span class="fw-addr" id="fw-addr">anon://</span>
-      <button class="fw-close" data-close type="button" aria-label={t.closeLabel}>{t.closeLabel} ✕</button>
+      <button class="fw-close" data-close type="button" data-tfy-event="project_close" aria-label={t.closeLabel}>{t.closeLabel} ✕</button>
     </div>
     <div class="fw-inner">
       <div class="fw-meta"><span id="fw-num"></span><span id="fw-year"></span></div>
@@ -213,7 +240,7 @@ const clientProjects = projects.map((p) => ({
       <p class="fw-brief" id="fw-brief"></p>
       <div class="fw-stack-label">{t.stackLabel}</div>
       <div class="fw-stack" id="fw-stack"></div>
-      <a class="fw-open" id="fw-open" href="#" target="_blank" rel="noopener">{t.openLive}</a>
+      <a class="fw-open" id="fw-open" href="#" target="_blank" rel="noopener" data-tfy-event="project_open_live">{t.openLive}</a>
     </div>
   </div>
 
@@ -595,8 +622,6 @@ const clientProjects = projects.map((p) => ({
 
     .channel { max-width: 1480px; margin: 0 auto; padding: 90px clamp(28px, 5vw, 72px) 70px; }
     .channel .label { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg2); letter-spacing: 0.04em; margin-bottom: 30px; }
-    .channel a.signal { display: inline-block; text-decoration: none; color: var(--fg); font-weight: 600; font-size: clamp(34px, 7vw, 84px); letter-spacing: -0.03em; line-height: 1; transition: color .3s ease; }
-    .channel a.signal:hover { color: var(--accent); }
     .channel .signed { margin-top: 48px; display: flex; align-items: center; gap: 14px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg3); flex-wrap: wrap; }
     .channel .signed .lbl { color: var(--fg2); }
     .channel .signed .cipher { color: var(--accent); letter-spacing: 0.1em; }

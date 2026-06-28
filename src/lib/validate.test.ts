@@ -65,6 +65,13 @@ describe('validateContact', () => {
     expect(r).toMatchObject({ ok: false, reason: 'message' });
   });
 
+  it('counts non-space characters toward the message minimum', () => {
+    // 14 real characters padded with spaces — still too short.
+    expect(validateContact({ ...good, message: 'abcd efgh ijkl mn' })).toMatchObject({ ok: false, reason: 'message' });
+    // Exactly 15 non-space characters spread across words — accepted.
+    expect(validateContact({ ...good, message: 'hello there world' })).toMatchObject({ ok: true });
+  });
+
   it('rejects a message over the max length', () => {
     const r = validateContact({ ...good, message: 'a'.repeat(3001) });
     expect(r).toMatchObject({ ok: false, reason: 'message' });

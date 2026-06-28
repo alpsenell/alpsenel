@@ -38,7 +38,7 @@ const t = strings[lang];
 
 <script
   is:inline
-  define:vars={{ sending: t.contactSending, netError: t.contactError, lang }}
+  define:vars={{ sending: t.contactSending, netError: t.contactError, emailError: t.contactEmailError, messageError: t.contactMessageError, lang }}
 >
   (function () {
     const form = document.querySelector('[data-contact]');
@@ -52,18 +52,34 @@ const t = strings[lang];
     let busy = false;
     let done = false;
 
+    // Keep these in lockstep with src/lib/validate.ts — the server re-validates.
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var MESSAGE_MIN = 15; // non-whitespace characters
+
     function setStatus(text, kind) {
       status.textContent = text || '';
       status.dataset.kind = kind || '';
     }
 
-    // Light client-side gate for instant feedback — the server re-validates.
-    function clientValid() {
-      if (!nameEl.value.trim()) return false;
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) return false;
-      if (msgEl.value.trim().length < 10) return false;
-      return true;
+    function nonSpaceLen(value) {
+      return value.replace(/\s/g, '').length;
     }
+
+    // Light client-side gate for instant feedback — the server re-validates.
+    // Custom validity messages let the browser surface the exact problem inline.
+    function clientValid() {
+      var emailOk = EMAIL_RE.test(emailEl.value.trim());
+      var msgOk = nonSpaceLen(msgEl.value) >= MESSAGE_MIN;
+      emailEl.setCustomValidity(emailOk ? '' : emailError);
+      msgEl.setCustomValidity(msgOk ? '' : messageError);
+      // Name relies on the native `required` constraint for its message.
+      return nameEl.value.trim().length > 0 && emailOk && msgOk;
+    }
+
+    // Clear a field's custom error as soon as the visitor edits it again.
+    [emailEl, msgEl].forEach(function (el) {
+      el.addEventListener('input', function () { el.setCustomValidity(''); });
+    });
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -73,6 +89,9 @@ const t = strings[lang];
         form.reportValidity();
         return;
       }
+
+      // A valid send was triggered — covers both the button and Enter key.
+      if (window.tfyEvent) window.tfyEvent('contact_submit');
 
       busy = true;
       btn.disabled = true;
@@ -102,6 +121,7 @@ const t = strings[lang];
 
       if (res.ok) {
         done = true;
+        if (window.tfyEvent) window.tfyEvent('contact_sent');
         setStatus(data.message || '', 'ok');
         nameEl.disabled = emailEl.disabled = msgEl.disabled = btn.disabled = true;
         return;
