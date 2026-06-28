@@ -555,6 +555,30 @@ const clientProjects = projects.map((p) => ({
     })();
   </script>
 
+  <!-- Hero "signal" link smooth-scrolls to the contact form at the foot of the
+       page and focuses its first field, instead of opening a mail client. The
+       mailto href stays as a fallback for modified/middle clicks (open in new
+       tab, copy address) and no-JS visitors; the contact_mailto event still
+       fires through the delegated tracker in <head>. -->
+  <script is:inline>
+    (function () {
+      var link = document.querySelector('[data-tfy-event="contact_mailto"]');
+      var form = document.querySelector('[data-contact]');
+      if (!link || !form) return;
+      var target = form.closest('section') || form;
+      var nameInput = form.querySelector('[data-cf-name]');
+      link.addEventListener('click', function (e) {
+        // Let modified / non-left clicks keep the native mailto behaviour.
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Defer focus so it doesn't fight the smooth scroll; preventScroll
+        // leaves the animated scroll in charge of the final position.
+        if (nameInput) setTimeout(function () { nameInput.focus({ preventScroll: true }); }, 600);
+      });
+    })();
+  </script>
+
   <style is:global>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
