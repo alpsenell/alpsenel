@@ -13,6 +13,18 @@ export interface Project {
   brief: Record<Lang, string>;
 }
 
+export type StoreKind = 'appstore' | 'shopify';
+
+export interface StoreListing {
+  store: StoreKind;
+  url: string;
+}
+
+export const storeListings: Record<string, StoreListing> = {
+  testerify: { store: 'shopify', url: 'https://apps.shopify.com/testerify' },
+  keepfall: { store: 'appstore', url: 'https://apps.apple.com/tr/app/keepfall-castle-cannon-duel/id6820699414' },
+};
+
 export const projects: Project[] = [
   {
     num: '01',
@@ -22,12 +34,24 @@ export const projects: Project[] = [
     handle: 'testerify',
     tech: ['Vue 3', 'Vite', 'Vercel', 'Drizzle ORM', 'Neon Postgres', 'Claude API', 'Shopify App'],
     brief: {
-      en: 'Alp\'s own SaaS product — an A/B testing platform for Shopify stores. Merchants run storefront experiments through a visual editor, and Testerify tracks impressions, conversions and revenue to call a statistically sound winner. AI-powered test suggestions and insights via the Claude API. Built end to end: native Shopify app plus a standalone Vue web panel.',
-      tr: 'Alp\'ın kendi SaaS ürünü — Shopify mağazaları için bir A/B test platformu. Satıcılar görsel bir editörle vitrin deneyleri kurar; Testerify gösterim, dönüşüm ve geliri izleyerek istatistiksel olarak sağlam bir kazananı belirler. Claude API ile yapay zekâ destekli test önerileri ve içgörüler. Uçtan uca geliştirildi: yerel Shopify uygulaması ve bağımsız bir Vue web paneli.',
+      en: 'Alp\'s own SaaS product, now live on the Shopify App Store — an A/B testing platform for Shopify stores. Merchants run storefront experiments through a visual editor, and Testerify tracks impressions, conversions and revenue to call a statistically sound winner. AI-powered test suggestions and insights via the Claude API. Built end to end: native Shopify app plus a standalone Vue web panel.',
+      tr: 'Alp\'ın kendi SaaS ürünü, artık Shopify App Store\'da yayında — Shopify mağazaları için bir A/B test platformu. Satıcılar görsel bir editörle vitrin deneyleri kurar; Testerify gösterim, dönüşüm ve geliri izleyerek istatistiksel olarak sağlam bir kazananı belirler. Claude API ile yapay zekâ destekli test önerileri ve içgörüler. Uçtan uca geliştirildi: yerel Shopify uygulaması ve bağımsız bir Vue web paneli.',
     },
   },
   {
     num: '02',
+    name: 'KEEPFALL',
+    year: '2026',
+    url: 'https://apps.apple.com/tr/app/keepfall-castle-cannon-duel/id6820699414',
+    handle: 'keepfall',
+    tech: ['iOS', 'App Store'],
+    brief: {
+      en: 'Keepfall: Castle Cannon Duel — Alp\'s own mobile game, live on the App Store. A castle-versus-castle cannon duel: line up your shot, fire, and bring down the rival keep before yours falls. Designed and shipped end to end, from gameplay to store release.',
+      tr: 'Keepfall: Castle Cannon Duel — Alp\'ın kendi mobil oyunu, App Store\'da yayında. Kaleye karşı kale bir top düellosu: atışını ayarla, ateşle ve seninki yıkılmadan rakip kaleyi düşür. Oynanıştan mağaza yayınına kadar uçtan uca tasarlanıp geliştirildi.',
+    },
+  },
+  {
+    num: '03',
     name: 'YAZ EVI',
     year: '2025 — today',
     url: 'https://www.yaz-evi.com/',
@@ -39,7 +63,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '03',
+    num: '04',
     name: 'INO BEAUTY',
     year: '2026 — today',
     url: 'https://inobeauty.com.tr/',
@@ -51,7 +75,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '04',
+    num: '05',
     name: 'URBAN CARE',
     year: '2026 — today',
     url: 'https://urbancare.com.tr/',
@@ -63,7 +87,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '05',
+    num: '06',
     name: 'VOLTA MOTOR',
     year: '2026 — today',
     url: 'https://www.voltamotorbuyukcekmece.com/',
@@ -75,7 +99,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '06',
+    num: '07',
     name: 'STEPHEN WEBSTER',
     year: '2023 — today',
     url: 'https://www.stephenwebster.com/',
@@ -87,7 +111,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '07',
+    num: '08',
     name: 'STERLING HOME',
     year: '2026 — today',
     url: 'https://sterlinghome.co.uk/',
@@ -99,7 +123,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '08',
+    num: '09',
     name: 'WILKINSON SWORD',
     year: '2024 — today',
     url: 'https://www.wilkinsonsword.com/',
@@ -111,7 +135,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '09',
+    num: '10',
     name: 'BULLDOG SKINCARE',
     year: '2025 — today',
     url: 'https://www.bulldogskincare.com/',
@@ -123,7 +147,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '10',
+    num: '11',
     name: 'NOBODY\'S CHILD',
     year: '2024 — today',
     url: 'https://www.nobodyschild.com/',
@@ -135,7 +159,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '11',
+    num: '12',
     name: 'A COLLECTED MAN',
     year: '2022 — today',
     url: 'https://www.acollectedman.com/',
@@ -147,7 +171,7 @@ export const projects: Project[] = [
     },
   },
   {
-    num: '12',
+    num: '13',
     name: 'LYMA',
     year: '2024 — today',
     url: 'https://lyma.life/',

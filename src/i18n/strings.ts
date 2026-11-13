@@ -47,6 +47,11 @@ export interface Strings {
   stackLabel: string;
   openLive: string;
   closeLabel: string;
+  /** Store-listing labels for own products (badge in the list, CTA in the window). */
+  liveOn: string;
+  ownProduct: string;
+  storeCta: Record<'appstore' | 'shopify', string>;
+  storeShort: Record<'appstore' | 'shopify', string>;
   /** Label + href of the OTHER language, for the header toggle. */
   otherLangLabel: string;
   otherLangHref: string;
@@ -96,6 +101,10 @@ export const strings: Record<Lang, Strings> = {
     stackLabel: 'STACK',
     openLive: 'OPEN LIVE ↗',
     closeLabel: 'close',
+    liveOn: 'LIVE',
+    ownProduct: 'OWN PRODUCT',
+    storeCta: { appstore: 'DOWNLOAD ON THE APP STORE ↗', shopify: 'INSTALL FROM SHOPIFY APP STORE ↗' },
+    storeShort: { appstore: 'APP STORE', shopify: 'SHOPIFY APP STORE' },
     otherLangLabel: 'TR',
     otherLangHref: '/tr/',
   },
@@ -142,6 +151,10 @@ export const strings: Record<Lang, Strings> = {
     stackLabel: 'TEKNOLOJİ',
     openLive: 'CANLI AÇ ↗',
     closeLabel: 'kapat',
+    liveOn: 'YAYINDA',
+    ownProduct: 'KENDİ ÜRÜNÜM',
+    storeCta: { appstore: "APP STORE'DAN İNDİR ↗", shopify: "SHOPIFY APP STORE'DAN YÜKLE ↗" },
+    storeShort: { appstore: 'APP STORE', shopify: 'SHOPIFY APP STORE' },
     otherLangLabel: 'EN',
     otherLangHref: '/',
   },
