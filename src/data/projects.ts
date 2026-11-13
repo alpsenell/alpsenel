@@ -25,6 +25,25 @@ export const storeListings: Record<string, StoreListing> = {
   keepfall: { store: 'appstore', url: 'https://apps.apple.com/tr/app/keepfall-castle-cannon-duel/id6820699414' },
 };
 
+const shopifyStore = { en: 'SHOPIFY STORE BUILD', tr: 'SHOPIFY MAĞAZA' };
+const shopifyPlusStore = { en: 'SHOPIFY PLUS BUILD', tr: 'SHOPIFY PLUS MAĞAZA' };
+
+export const projectKinds: Record<string, Record<Lang, string>> = {
+  testerify: { en: 'SHOPIFY APP · SAAS', tr: 'SHOPIFY UYGULAMASI · SAAS' },
+  keepfall: { en: 'iOS GAME', tr: 'iOS OYUNU' },
+  'yaz-evi': { en: 'WEBSITE + BOOKING ENGINE', tr: 'WEB SİTESİ + REZERVASYON' },
+  'ino-beauty': shopifyStore,
+  'urban-care': shopifyStore,
+  'volta-motor': { en: 'NEXT.JS WEBSITE', tr: 'NEXT.JS WEB SİTESİ' },
+  'stephen-webster': shopifyPlusStore,
+  'sterling-home': shopifyStore,
+  'wilkinson-sword': shopifyPlusStore,
+  'bulldog-skincare': shopifyPlusStore,
+  'nobodys-child': shopifyPlusStore,
+  'a-collected-man': shopifyStore,
+  lyma: shopifyPlusStore,
+};
+
 export const projects: Project[] = [
   {
     num: '01',
